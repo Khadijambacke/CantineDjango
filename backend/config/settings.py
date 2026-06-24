@@ -144,5 +144,28 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
+# Configuration de Swagger (drf-spectacular)
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'API Gestion de Cantine',
+    'DESCRIPTION': 'Documentation de la cantine Django Backend',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    # On ajoute la sécurité JWT dans Swagger
+    'SECURITY': [{
+        'jwt': []
+    }],
+    'APPEND_COMPONENTS': {
+        'securitySchemes': {
+            'jwt': {
+                'type': 'apiKey',
+                'in': 'header',
+                'name': 'Authorization',
+                'description': 'Entrez votre token sous la forme : Bearer <votre_token>'
+            }
+        }
+    }
+}
+
 STATIC_URL = 'static/'
 JWT_EXPIRES_DAYS = 7
+APPEND_SLASH = False
