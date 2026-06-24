@@ -27,6 +27,10 @@ class RegisterSerializer(serializers.ModelSerializer):
         user = User.objects.create(**validated_data)
         return user
 
+class LoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
+
 # Pour la suite, on créera les traducteurs pour les plats et réservations :
 class PlatSerializer(serializers.ModelSerializer):
     class Meta:

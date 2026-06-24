@@ -5,7 +5,6 @@ from rest_framework.permissions import IsAuthenticated
 from ..permissions import IsGestionnaire
 
 class DashboardGestionnaireView(APIView):
-    """ Exemple de contrôleur strictement réservé au Gestionnaire """
     
     permission_classes = [IsAuthenticated, IsGestionnaire]
 
