@@ -42,3 +42,19 @@ authentication.py sert à vérifier ce token quand l'utilisateur visite les autr
 
     def authenticate_header(self, request):
         return 'Bearer'
+
+
+from drf_spectacular.extensions import OpenApiAuthenticationExtension
+
+class JWTAuthenticationScheme(OpenApiAuthenticationExtension):
+    target_class = 'api.authentication.JWTAuthentication'
+    name = 'jwt'
+
+    def get_security_definition(self, auto_schema):
+        return {
+            'type': 'apiKey',
+            'in': 'header',
+            'name': 'Authorization',
+            'description': 'Entrez votre token sous la forme : Bearer <votre_token>'
+        }
+
