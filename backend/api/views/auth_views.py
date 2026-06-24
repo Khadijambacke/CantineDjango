@@ -1,16 +1,24 @@
 import jwt
-import datetime
+from datetime import datetime, timedelta, timezone
 from django.conf import settings
 from django.contrib.auth.hashers import check_password
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 
-# Attention : On utilise ".." (deux points) car on est maintenant dans un sous-dossier (views)
-# et on veut remonter d'un niveau pour accéder à models.py et serializers.py
 from ..models import User
 from ..serializers import UserSerializer, RegisterSerializer
+
+# --- LA FONCTION DU PROF ---
+def generate_token(user):
+    payload = {
+        'id': user.id,
+        'email': user.email,
+        'role': user.role,
+        'exp': datetime.now(tz=timezone.utc) + timedelta(days=settings.JWT_EXPIRES_DAYS),
+    }
+    return jwt.encode(payload, settings.JWT_SECRET, algorithm='HS256')
 
 class RegisterView(APIView):
     """ Contrôleur pour l'inscription d'un nouvel employé """
@@ -43,16 +51,32 @@ class LoginView(APIView):
         if not check_password(password, user.password):
             return Response({'error': 'Email ou mot de passe incorrect.'}, status=status.HTTP_401_UNAUTHORIZED)
 
-        payload = {
-            'id': user.id,
-            'role': user.role,
-            'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=24),
-            'iat': datetime.datetime.utcnow()
-        }
-
-        token = jwt.encode(payload, settings.JWT_SECRET, algorithm='HS256')
+        token = generate_token(user)
 
         return Response({
             'jwt': token,
             'user': UserSerializer(user).data
+        })
+
+class LogoutView(APIView):
+    """
+    POST /api/logout - Déconnexion.
+    Note : Le JWT n'est pas stocké côté serveur, donc on dit juste au front-end 
+    (React/Vue) de supprimer son token.
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request):
+        return Response({
+            'message': 'Déconnexion réussie. Supprimez le token côté client.'
+        })
+
+class MeView(APIView):
+    """GET /api/me - Récupère le profil de l'utilisateur connecté."""
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        return Response({
+            'message': 'Profil récupéré.',
+            'user': UserSerializer(request.user).data,
         })
