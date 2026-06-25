@@ -1,6 +1,7 @@
 import jwt
-import datetime
 import random
+from datetime import datetime, timedelta, timezone
+import datetime as dt_module
 from django.conf import settings
 from django.contrib.auth.hashers import check_password
 from django.utils import timezone
@@ -8,15 +9,32 @@ from django.core.mail import send_mail
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from drf_spectacular.utils import extend_schema, OpenApiTypes
 
 from ..models import User
-from ..serializers import UserSerializer, RegisterSerializer
+from ..serializers import UserSerializer, RegisterSerializer, LoginSerializer
+
+# --- LA FONCTION DU PROF ---
+def generate_token(user):
+    payload = {
+        'id': user.id,
+        'email': user.email,
+        'role': user.role,
+        'exp': datetime.now(tz=timezone.utc) + timedelta(days=settings.JWT_EXPIRES_DAYS),
+    }
+    return jwt.encode(payload, settings.JWT_SECRET, algorithm='HS256')
 
 class RegisterView(APIView):
     """ Contrôleur pour l'inscription d'un nouvel employé """
     permission_classes = [AllowAny]
+    serializer_class = RegisterSerializer
 
+    @extend_schema(
+        summary="Inscription d'un nouvel employé",
+        request=RegisterSerializer,
+        responses={201: OpenApiTypes.OBJECT, 400: OpenApiTypes.OBJECT}
+    )
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
         
@@ -26,7 +44,7 @@ class RegisterView(APIView):
             # Génération de l'OTP (6 chiffres)
             otp = f"{random.randint(100000, 999999)}"
             user.otp_code = otp
-            user.otp_expires_at = timezone.now() + datetime.timedelta(minutes=10)
+            user.otp_expires_at = timezone.now() + dt_module.timedelta(minutes=10)
             user.is_verified = False # Par défaut bloqué tant que l'e-mail n'est pas validé
             user.save()
             
@@ -108,7 +126,7 @@ class ResendOTPView(APIView):
         # Générer un nouvel OTP
         otp = f"{random.randint(100000, 999999)}"
         user.otp_code = otp
-        user.otp_expires_at = timezone.now() + datetime.timedelta(minutes=10)
+        user.otp_expires_at = timezone.now() + dt_module.timedelta(minutes=10)
         user.save()
 
         # Envoi de l'e-mail
@@ -133,7 +151,13 @@ class ResendOTPView(APIView):
 class LoginView(APIView):
     """ Contrôleur pour la connexion (Génère le Token JWT) """
     permission_classes = [AllowAny]
+    serializer_class = LoginSerializer
 
+    @extend_schema(
+        summary="Connexion de l'utilisateur",
+        request=LoginSerializer,
+        responses={200: OpenApiTypes.OBJECT, 401: OpenApiTypes.OBJECT}
+    )
     def post(self, request):
         email = request.data.get('email')
         password = request.data.get('password')
@@ -153,16 +177,42 @@ class LoginView(APIView):
                 'not_verified': True
             }, status=status.HTTP_403_FORBIDDEN)
 
-        payload = {
-            'id': user.id,
-            'role': user.role,
-            'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=24),
-            'iat': datetime.datetime.utcnow()
-        }
-
-        token = jwt.encode(payload, settings.JWT_SECRET, algorithm='HS256')
+        token = generate_token(user)
 
         return Response({
             'jwt': token,
             'user': UserSerializer(user).data
+        })
+
+class LogoutView(APIView):
+    """
+    POST /api/logout - Déconnexion.
+    Note : Le JWT n'est pas stocké côté serveur, donc on dit juste au front-end 
+    (React/Vue) de supprimer son token.
+    """
+    permission_classes = [IsAuthenticated]
+    
+    @extend_schema(
+        summary="Déconnexion de l'utilisateur",
+        request=None,
+        responses={200: OpenApiTypes.OBJECT}
+    )
+    def post(self, request):
+        return Response({
+            'message': 'Déconnexion réussie. Supprimez le token côté client.'
+        })
+
+class MeView(APIView):
+    """GET /api/me - Récupère le profil de l'utilisateur connecté."""
+    permission_classes = [IsAuthenticated]
+    serializer_class = UserSerializer
+    
+    @extend_schema(
+        summary="Récupérer le profil connecté",
+        responses={200: UserSerializer}
+    )
+    def get(self, request):
+        return Response({
+            'message': 'Profil récupéré.',
+            'user': UserSerializer(request.user).data,
         })

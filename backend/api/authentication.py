@@ -6,6 +6,8 @@ from .models import User
 
 class JWTAuthentication(BaseAuthentication):
     """
+    auth_views.py sert à donner le token à l'utilisateur quand il se connecte.
+authentication.py sert à vérifier ce token quand l'utilisateur visite les autres pages du site.
     Cette classe agit comme un vigile à l'entrée de ton site.
     Pour chaque requête, elle regarde si l'utilisateur a envoyé un token JWT valide.
     """
@@ -40,3 +42,19 @@ class JWTAuthentication(BaseAuthentication):
 
     def authenticate_header(self, request):
         return 'Bearer'
+
+
+from drf_spectacular.extensions import OpenApiAuthenticationExtension
+
+class JWTAuthenticationScheme(OpenApiAuthenticationExtension):
+    target_class = 'api.authentication.JWTAuthentication'
+    name = 'jwt'
+
+    def get_security_definition(self, auto_schema):
+        return {
+            'type': 'apiKey',
+            'in': 'header',
+            'name': 'Authorization',
+            'description': 'Entrez votre token sous la forme : Bearer <votre_token>'
+        }
+
