@@ -27,6 +27,8 @@ class User(models.Model):
     solde = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     mode_paiement = models.CharField(max_length=15, choices=MODE_PAIEMENT_CHOICES, default='facture')
     is_verified = models.BooleanField(default=False) # Bloqué tant que l'OTP n'est pas validé
+    otp_code = models.CharField(max_length=6, blank=True, null=True)
+    otp_expires_at = models.DateTimeField(blank=True, null=True)
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
