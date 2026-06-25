@@ -6,11 +6,13 @@ env/
 # Fichiers d'environnement
 .env
 
+
 # Fichiers compilés Python
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
+
 
 # Base de données locale (à ignorer en général sur GitHub, sauf si c'est un template)
 # db.sqlite3 
