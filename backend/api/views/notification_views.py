@@ -85,3 +85,33 @@ class BroadcastNotificationView(APIView):
         return Response({
             'message': f'{len(notifs)} notification(s) envoyée(s) avec succès.'
         }, status=status.HTTP_201_CREATED)
+
+
+class MessageCuisinierView(APIView):
+    """
+    POST /api/notifications/message-cuisinier/ - Un employé envoie un message/instruction à la cuisine
+    Body: { message }
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        message = request.data.get('message', '').strip()
+
+        if not message:
+            return Response({'message': 'Le message ne peut pas être vide.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        employe = request.user
+        titre = f"Message de {employe.prenom} {employe.nom}"
+        msg_complet = f"[Instruction cuisine]\n{message}"
+
+        # Envoyer à tous les cuisiniers
+        cuisiniers = User.objects.filter(role='cuisinier')
+        if not cuisiniers.exists():
+            return Response({'message': 'Aucun cuisinier disponible pour recevoir le message.'}, status=status.HTTP_404_NOT_FOUND)
+
+        notifs = [Notification(user=c, titre=titre, message=msg_complet) for c in cuisiniers]
+        Notification.objects.bulk_create(notifs)
+
+        return Response({
+            'message': f'Votre message a été transmis à l\'équipe de cuisine.'
+        }, status=status.HTTP_201_CREATED)

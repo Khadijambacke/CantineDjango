@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CantinEntreprise - Dashboard Cuisinier</title>
+    <title>CantinEntreprise - Espace Cuisinier</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="assets/css/style.css">
     <script>
         tailwind.config = {
             theme: {
@@ -15,14 +14,11 @@
                         brand: '#FF5A00',
                         brandLight: '#FFF0E6',
                         surface: '#FDFDFD',
-                        card: '#FFFFFF',
                         textDark: '#1A1A1A',
                         textMuted: '#7A7A7A',
                         success: '#10B981',
                         warning: '#F59E0B'
-                    },
-                    borderRadius: { '4xl': '2rem', '5xl': '2.5rem' },
-                    boxShadow: { 'soft': '0 10px 40px -10px rgba(0,0,0,0.08)' }
+                    }
                 }
             }
         }
@@ -30,38 +26,45 @@
     <style>
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        @keyframes blob {
+            0%, 100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40% }
+            50% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60% }
+        }
+        .blob-a { animation: blob 8s infinite ease-in-out; }
+        .ticket-enter { animation: slideIn 0.3s ease-out forwards; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body class="bg-surface text-textDark antialiased flex h-screen overflow-hidden">
-    <script src="assets/js/app.js"></script>
-    <script>checkAuthGuard();</script>
-
-    <!-- Sidebar -->
-    <aside class="w-64 hidden lg:flex flex-col bg-white border-r border-gray-100 p-6 flex-shrink-0 z-20">
+    <!-- SIDEBAR -->
+    <aside class="w-64 hidden lg:flex flex-col bg-white border-r border-gray-100 p-6 flex-shrink-0">
         <div class="flex items-center space-x-3 mb-10 pl-2">
-            <div class="w-10 h-10 bg-brand text-white rounded-xl flex items-center justify-center font-bold shadow-soft">
+            <div class="w-10 h-10 bg-brand text-white rounded-xl flex items-center justify-center font-bold">
                 <i class="fa-solid fa-utensils"></i>
             </div>
             <span class="font-extrabold text-lg tracking-tight">CantinEntreprise</span>
         </div>
-
-        <nav class="flex-1 space-y-2">
-            <p class="text-[10px] font-bold text-textMuted uppercase tracking-widest pl-2 mb-3">Menu Cuisinier</p>
-            <a href="#" class="flex items-center px-4 py-3 bg-brandLight text-brand rounded-2xl font-bold transition">
-                <i class="fa-solid fa-fire-burner w-6"></i>
-                <span class="text-sm">Préparations</span>
-            </a>
-            <a href="#" class="flex items-center px-4 py-3 text-textMuted hover:bg-gray-50 hover:text-textDark rounded-2xl font-bold transition">
-                <i class="fa-solid fa-book-open w-6"></i>
-                <span class="text-sm">Gérer les Menus</span>
-            </a>
+        <nav class="flex-1 space-y-1">
+            <p class="text-[10px] font-bold text-textMuted uppercase tracking-widest pl-3 mb-3">Menu Cuisinier</p>
+            <button id="nav-stats" onclick="showTab('stats')" class="w-full flex items-center px-4 py-3 bg-brandLight text-brand rounded-2xl font-bold transition text-sm">
+                <i class="fa-solid fa-chart-pie w-6"></i>Tableau de bord
+            </button>
+            <button id="nav-plats" onclick="showTab('plats')" class="w-full flex items-center px-4 py-3 text-textMuted hover:bg-gray-50 rounded-2xl font-bold transition text-sm">
+                <i class="fa-solid fa-pizza-slice w-6"></i>Gestion des Plats
+            </button>
+            <button id="nav-menus" onclick="showTab('menus')" class="w-full flex items-center px-4 py-3 text-textMuted hover:bg-gray-50 rounded-2xl font-bold transition text-sm">
+                <i class="fa-solid fa-calendar-days w-6"></i>Menu du Jour
+            </button>
+            <button id="nav-commandes" onclick="showTab('commandes')" class="w-full flex items-center px-4 py-3 text-textMuted hover:bg-gray-50 rounded-2xl font-bold transition text-sm">
+                <i class="fa-solid fa-fire-burner w-6"></i>Commandes du jour
+            </button>
         </nav>
-
-        <div class="mt-auto bg-surface p-4 rounded-2xl border border-gray-50 flex items-center justify-between cursor-pointer hover:border-gray-200 transition" onclick="logout()">
+        
+        <div class="bg-surface p-3 rounded-2xl border border-gray-100 flex items-center justify-between cursor-pointer hover:border-gray-200 transition" onclick="logout()">
             <div class="flex items-center">
-                <div class="w-10 h-10 rounded-full bg-brandLight text-brand flex items-center justify-center font-bold text-sm" id="desktopAvatar">C</div>
+                <div class="w-9 h-9 rounded-full bg-brandLight text-brand flex items-center justify-center font-bold text-sm u-avatar">C</div>
                 <div class="ml-3">
-                    <h3 class="text-xs font-bold text-textDark line-clamp-1" id="desktopUserName">Chef</h3>
+                    <p class="text-xs font-bold u-name truncate max-w-[90px]">Chef</p>
                     <p class="text-[10px] text-textMuted">Déconnexion</p>
                 </div>
             </div>
@@ -69,244 +72,1079 @@
         </div>
     </aside>
 
-    <!-- Main Content -->
-    <main class="flex-1 flex flex-col h-full overflow-y-auto no-scrollbar relative z-10 pb-24 lg:pb-0">
-        <header class="lg:hidden px-6 pt-6 pb-2 flex items-center justify-between bg-surface sticky top-0 z-30">
+    <!-- MAIN -->
+    <main class="flex-1 flex flex-col h-full overflow-hidden">
+        <!-- Header -->
+        <header class="px-6 py-4 bg-white border-b border-gray-100 flex items-center justify-between flex-shrink-0 z-20">
             <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-full bg-brandLight text-brand flex items-center justify-center font-bold" id="mobileAvatar">C</div>
-                <div>
-                    <p class="text-[10px] text-textMuted uppercase tracking-wider">Espace Cuisine</p>
-                    <h1 class="text-sm font-bold leading-tight" id="mobileUserName">Chef</h1>
-                </div>
+                <div class="w-9 h-9 rounded-full bg-brandLight text-brand flex items-center justify-center font-bold lg:hidden u-avatar">C</div>
+                <h1 class="font-extrabold text-xl" id="headerTitle">Tableau de Bord</h1>
             </div>
-            <button onclick="logout()" class="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-textMuted border border-gray-100">
-                <i class="fa-solid fa-power-off text-sm"></i>
-            </button>
+            <!-- mobile nav pills -->
+            <div class="flex space-x-1 lg:hidden text-[10px] font-bold">
+                <button onclick="showTab('stats')" class="px-2.5 py-1.5 bg-brandLight text-brand rounded-full">Stats</button>
+                <button onclick="showTab('plats')" class="px-2.5 py-1.5 text-textMuted">Plats</button>
+                <button onclick="showTab('menus')" class="px-2.5 py-1.5 text-textMuted">Menus</button>
+                <button onclick="showTab('commandes')" class="px-2.5 py-1.5 text-textMuted">Commandes</button>
+            </div>
         </header>
 
-        <div class="p-6 lg:p-8 xl:p-10 space-y-8 max-w-6xl mx-auto w-full">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h1 class="text-2xl font-extrabold" id="desktopGreeting">Tableau de Bord Cuisine</h1>
-                    <p class="text-sm text-textMuted">Vue d'ensemble des préparations du jour.</p>
+        <div class="flex-1 overflow-y-auto no-scrollbar bg-surface/30">
+            
+            <!-- ═══ TAB 1: TABLEAU DE BORD (STATS & NOTIFS) ═══ -->
+            <div id="tab-stats" class="p-6 lg:p-8 space-y-8 max-w-7xl mx-auto">
+                <div class="relative bg-brand text-white rounded-[2rem] p-8 overflow-hidden">
+                    <div class="absolute -top-12 -right-12 w-48 h-48 bg-white/10 blob-a"></div>
+                    <h1 class="text-2xl font-extrabold relative z-10">Bienvenue Chef !</h1>
+                    <p class="text-white/70 text-sm mt-2 relative z-10">Pilotez votre cuisine en temps réel. Gérez vos plats, planifiez vos menus et suivez les commandes.</p>
                 </div>
-            </div>
 
-            <!-- KPIs -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-                <div class="bg-brand text-white rounded-[2rem] p-6 shadow-soft relative overflow-hidden">
-                    <div class="absolute -right-4 -top-4 w-24 h-24 bg-white/20 rounded-full blur-xl"></div>
-                    <div class="flex justify-between items-start relative z-10">
-                        <div>
-                            <p class="text-xs font-bold uppercase tracking-wider opacity-80 mb-1">Total Réservations</p>
-                            <h3 id="kpiTotal" class="text-4xl font-extrabold">...</h3>
-                        </div>
-                        <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-md">
-                            <i class="fa-solid fa-users text-white"></i>
-                        </div>
+                <!-- KPIs -->
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-white rounded-3xl border border-gray-100 p-5 shadow-sm">
+                        <div class="w-10 h-10 bg-brandLight rounded-xl flex items-center justify-center mb-3"><i class="fa-solid fa-receipt text-brand"></i></div>
+                        <p class="text-[10px] font-bold text-textMuted uppercase tracking-wider">Commandes du jour</p>
+                        <p class="text-2xl font-extrabold mt-1" id="statTotalCmd">0</p>
+                    </div>
+                    <div class="bg-white rounded-3xl border border-gray-100 p-5 shadow-sm">
+                        <div class="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center mb-3"><i class="fa-solid fa-fire-burner text-warning"></i></div>
+                        <p class="text-[10px] font-bold text-textMuted uppercase tracking-wider">En attente / validées</p>
+                        <p class="text-2xl font-extrabold mt-1 text-textDark" id="statPrep">0 / 0</p>
+                    </div>
+                    <div class="bg-white rounded-3xl border border-gray-100 p-5 shadow-sm">
+                        <div class="w-10 h-10 bg-red-50 rounded-xl flex items-center justify-center mb-3"><i class="fa-solid fa-ban text-red-500"></i></div>
+                        <p class="text-[10px] font-bold text-textMuted uppercase tracking-wider">Taux d'annulation</p>
+                        <p class="text-2xl font-extrabold mt-1 text-red-500" id="statTauxAnnulation">0%</p>
+                    </div>
+                    <div class="bg-white rounded-3xl border border-gray-100 p-5 shadow-sm">
+                        <div class="w-10 h-10 bg-green-50 rounded-xl flex items-center justify-center mb-3"><i class="fa-solid fa-circle-check text-success"></i></div>
+                        <p class="text-[10px] font-bold text-textMuted uppercase tracking-wider">Plats les plus commandés</p>
+                        <p class="text-sm font-extrabold mt-1 truncate" id="statMostOrdered">-</p>
                     </div>
                 </div>
 
-                <div class="bg-white rounded-[2rem] p-6 border border-gray-100 shadow-sm">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="text-xs font-bold uppercase tracking-wider text-textMuted mb-1">En Préparation</p>
-                            <h3 id="kpiPrep" class="text-4xl font-extrabold text-warning">...</h3>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Notifications -->
+                    <div class="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm lg:col-span-2">
+                        <h3 class="font-extrabold text-lg mb-4 flex items-center justify-between">
+                            <span><i class="fa-solid fa-bell text-brand mr-2"></i>Notifications</span>
+                            <span class="w-2 h-2 bg-brand rounded-full animate-ping"></span>
+                        </h3>
+                        <div id="statNotifications" class="space-y-3 max-h-[300px] overflow-y-auto pr-2">
+                            <p class="text-sm text-textMuted">Aucune notification pour le moment.</p>
                         </div>
-                        <div class="w-10 h-10 bg-orange-50 rounded-full flex items-center justify-center">
-                            <i class="fa-solid fa-fire text-warning"></i>
+                    </div>
+
+                    <!-- Plats Favoris Chart (Visual Representation) -->
+                    <div class="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm flex flex-col justify-between">
+                        <div>
+                            <h3 class="font-extrabold text-base mb-4"><i class="fa-solid fa-chart-bar text-brand mr-2"></i>Palmarès des Plats</h3>
+                            <div id="favorisList" class="space-y-3">
+                                <!-- Rempli par JS -->
+                                <p class="text-xs text-textMuted">Pas encore de statistiques aujourd'hui.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="bg-white rounded-[2rem] p-6 border border-gray-100 shadow-sm">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="text-xs font-bold uppercase tracking-wider text-textMuted mb-1">Plats Prêts</p>
-                            <h3 id="kpiPret" class="text-4xl font-extrabold text-success">...</h3>
+            <!-- ═══ TAB 2: GESTION DES PLATS (CRUD) ═══ -->
+            <div id="tab-plats" class="hidden p-6 lg:p-8 space-y-6 max-w-7xl mx-auto">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h2 class="text-xl font-extrabold">Catalogue des Repas</h2>
+                        <p class="text-xs text-textMuted">Ajoutez, modifiez ou supprimez les plats proposés dans la cantine.</p>
+                    </div>
+                    <button onclick="openModalPlat()" class="h-11 px-5 bg-brand text-white rounded-2xl font-bold hover:-translate-y-0.5 transition shadow-lg shadow-brand/20 flex items-center">
+                        <i class="fa-solid fa-plus mr-2"></i>Ajouter un Plat
+                    </button>
+                </div>
+
+                <div class="relative max-w-md">
+                    <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-textMuted"></i>
+                    <input type="text" id="searchPlats" oninput="filterPlatsCatalogue()" placeholder="Rechercher un plat..." class="w-full bg-white border border-gray-200 rounded-2xl pl-11 pr-4 py-3 text-sm font-bold focus:outline-none focus:border-brand transition">
+                </div>
+
+                <div id="platsCatalogueGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    <!-- Cards -->
+                </div>
+            </div>
+
+            <!-- ═══ TAB 3: MENU DU JOUR (PLANNING) ═══ -->
+            <div id="tab-menus" class="hidden p-6 lg:p-8 space-y-6 max-w-7xl mx-auto">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Formulaire Planification -->
+                    <div class="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm h-fit">
+                        <h3 class="font-extrabold text-lg mb-4"><i class="fa-regular fa-calendar-plus text-brand mr-2"></i>Planifier le Menu</h3>
+                        <form onsubmit="submitMenu(event)" class="space-y-4">
+                            <div>
+                                <label class="text-xs font-bold text-textMuted block mb-1.5">Date du Menu <span class="text-brand">*</span> <span class="text-textMuted font-normal">(aujourd'hui ou jours futurs)</span></label>
+                                <input type="date" id="menuDate" required class="w-full bg-surface border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-bold focus:outline-none focus:border-brand transition">
+                            </div>
+                            <div>
+                                <label class="text-xs font-bold text-textMuted block mb-2">Sélectionnez les plats, boissons & desserts <span class="text-brand">*</span></label>
+                                <div class="max-h-80 overflow-y-auto pr-1 space-y-4 divide-y divide-gray-100 border border-gray-200 rounded-2xl p-3" id="platSelectionList">
+                                    <p class="text-xs text-textMuted py-4 text-center">Aucun plat disponible.</p>
+                                </div>
+                            </div>
+                            <button type="submit" id="btnSubmitMenu" class="w-full h-11 bg-brand text-white rounded-xl font-bold hover:-translate-y-0.5 transition shadow-md shadow-brand/20 flex items-center justify-center">
+                                <i class="fa-regular fa-calendar-check mr-2"></i>Publier le menu complet
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Liste des menus programmés -->
+                    <div class="lg:col-span-2 space-y-4">
+                        <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3 px-1">
+                            <h3 class="font-extrabold text-lg">Menus Programmés</h3>
+                            <!-- Sub-tabs for Actifs vs Historique -->
+                            <div class="flex bg-gray-100 p-1 rounded-xl">
+                                <button type="button" onclick="changeMenuSubTab('active')" id="btnMenuSubTab-active" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-brand shadow-sm transition">Actifs & À venir</button>
+                                <button type="button" onclick="changeMenuSubTab('history')" id="btnMenuSubTab-history" class="px-3 py-1.5 rounded-lg text-xs font-bold text-textMuted hover:bg-gray-50 transition">Historique</button>
+                            </div>
                         </div>
-                        <div class="w-10 h-10 bg-green-50 rounded-full flex items-center justify-center">
-                            <i class="fa-solid fa-check-double text-success"></i>
+                        <div id="menusScheduledList" class="space-y-4">
+                            <!-- Cards grouped by Date -->
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Suivi des préparations -->
-            <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-                <div class="p-6 border-b border-gray-50 flex items-center justify-between bg-surface/50">
-                    <h3 class="text-lg font-extrabold">Détail des Commandes à Préparer</h3>
+            <!-- ═══ TAB 4: GESTION DES COMMANDES ═══ -->
+            <div id="tab-commandes" class="hidden p-6 lg:p-8 space-y-6 max-w-7xl mx-auto">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-xl font-extrabold">Suivi des Commandes</h2>
+                        <p class="text-xs text-textMuted">Visualisez et mettez à jour l'état des repas commandés aujourd'hui.</p>
+                    </div>
+                    
+                    <!-- Filtres par statut -->
+                    <div class="flex flex-wrap gap-1 bg-white p-1 rounded-2xl border border-gray-100 shadow-sm">
+                        <button onclick="filterCommandes('tous')" class="btn-cmd-filter px-4 py-2 rounded-xl text-xs font-bold bg-brand text-white transition">Tous</button>
+                        <button onclick="filterCommandes('en_attente')" class="btn-cmd-filter px-4 py-2 rounded-xl text-xs font-bold text-textMuted hover:bg-gray-50 transition">En attente</button>
+                        <button onclick="filterCommandes('prepare')" class="btn-cmd-filter px-4 py-2 rounded-xl text-xs font-bold text-textMuted hover:bg-gray-50 transition">Prêts</button>
+                        <button onclick="filterCommandes('consomme')" class="btn-cmd-filter px-4 py-2 rounded-xl text-xs font-bold text-textMuted hover:bg-gray-50 transition">Servis</button>
+                        <button onclick="filterCommandes('annule')" class="btn-cmd-filter px-4 py-2 rounded-xl text-xs font-bold text-textMuted hover:bg-gray-50 transition">Annulés</button>
+                    </div>
                 </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-surface text-textMuted text-[10px] uppercase tracking-widest border-b border-gray-50">
-                                <th class="p-4 font-bold">Plat</th>
-                                <th class="p-4 font-bold text-center">Quantité Réservée</th>
-                                <th class="p-4 font-bold text-center">Prêts / Servis</th>
-                                <th class="p-4 font-bold text-right">Progression</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tableBody" class="text-sm divide-y divide-gray-50">
-                            <tr><td colspan="4" class="p-4 text-center text-textMuted">Chargement...</td></tr>
-                        </tbody>
-                    </table>
+
+                <!-- Tickets Grid -->
+                <div id="commandesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Rempli par JS -->
                 </div>
             </div>
 
-            <!-- Gérer les Menus (Aperçu) -->
-            <div>
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-extrabold">Menus de la Semaine</h3>
-                </div>
-                <div id="menusList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <!-- Généré par JS -->
-                </div>
-            </div>
         </div>
     </main>
 
+    <!-- MODAL AJOUT / MODIF PLAT -->
+    <div id="modalPlat" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-[2rem] w-full max-w-md shadow-2xl p-6 relative">
+            <button onclick="closeModalPlat()" class="absolute top-4 right-4 w-8 h-8 bg-gray-100 text-textMuted rounded-full flex items-center justify-center hover:bg-gray-200 transition"><i class="fa-solid fa-xmark text-sm"></i></button>
+            <h3 class="font-extrabold text-xl mb-1" id="modalPlatTitle">Ajouter un nouveau plat</h3>
+            <p class="text-xs text-textMuted mb-6">Saisissez les détails du plat pour le catalogue.</p>
+            
+            <form onsubmit="submitPlat(event)" id="formPlat" class="space-y-4">
+                <input type="hidden" id="platId">
+                <div>
+                    <label class="text-xs font-bold text-textMuted block mb-1.5">Nom du plat <span class="text-brand">*</span></label>
+                    <input type="text" id="platLibelle" required class="w-full bg-surface border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-bold focus:outline-none focus:border-brand transition" placeholder="Ex: Thiéboudienne">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-textMuted block mb-1.5">Description <span class="text-brand">*</span></label>
+                    <textarea id="platDesc" required rows="2" class="w-full bg-surface border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-bold focus:outline-none focus:border-brand transition resize-none" placeholder="Description du plat..."></textarea>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-xs font-bold text-textMuted block mb-1.5">Catégorie <span class="text-brand">*</span></label>
+                        <select id="platType" required class="w-full bg-surface border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-bold focus:outline-none focus:border-brand transition">
+                            <option value="plat">Plat Principal</option>
+                            <option value="entree">Entrée</option>
+                            <option value="dessert">Dessert</option>
+                            <option value="boisson">Boisson</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-textMuted block mb-1.5">Image <span class="text-brand" id="imgReqStar">*</span></label>
+                        <input type="file" id="platImageFile" class="w-full text-xs text-gray-500 file:mr-2 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-brandLight file:text-brand hover:file:bg-orange-100 transition">
+                    </div>
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-textMuted block mb-1.5">Ingrédients (séparés par des virgules)</label>
+                    <input type="text" id="platIngredients" class="w-full bg-surface border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-bold focus:outline-none focus:border-brand transition" placeholder="Ex: Riz, Poisson, Carotte">
+                </div>
+
+                <div id="platError" class="hidden text-xs font-bold text-red-500"></div>
+
+                <button type="submit" id="btnSubmitPlat" class="w-full h-12 bg-brand text-white rounded-2xl font-bold hover:-translate-y-0.5 transition shadow-lg shadow-brand/30">
+                    <i class="fa-solid fa-floppy-disk mr-2"></i>Enregistrer le plat
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL DÉTAILS COMMANDE -->
+    <div id="modalCmdDetail" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-[2rem] w-full max-w-sm shadow-2xl p-6 relative">
+            <button onclick="closeModalCmdDetail()" class="absolute top-4 right-4 w-8 h-8 bg-gray-100 text-textMuted rounded-full flex items-center justify-center hover:bg-gray-200 transition"><i class="fa-solid fa-xmark text-sm"></i></button>
+            <h3 class="font-extrabold text-xl mb-4">Détails de la Commande</h3>
+            
+            <div class="space-y-4">
+                <div class="flex items-center space-x-3 bg-gray-50 p-3 rounded-2xl">
+                    <div class="w-10 h-10 bg-brandLight text-brand rounded-full flex items-center justify-center font-bold" id="detailEmpAvatar">U</div>
+                    <div>
+                        <p class="font-bold text-sm" id="detailEmpName">-</p>
+                        <p class="text-[10px] text-textMuted" id="detailEmpPoste">-</p>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <p class="text-xs text-textMuted font-bold">Plat commandé :</p>
+                    <p class="font-extrabold text-sm" id="detailPlat">-</p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-xs text-textMuted font-bold">Heure :</p>
+                        <p class="font-bold text-xs text-textDark" id="detailHeure">-</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-textMuted font-bold">Statut :</p>
+                        <span class="inline-block px-2.5 py-1 rounded-full text-[10px] font-bold" id="detailStatutBadge">-</span>
+                    </div>
+                </div>
+
+                <div id="detailLieuContainer" class="hidden">
+                    <p class="text-xs text-textMuted font-bold">Lieu de livraison :</p>
+                    <p class="font-bold text-xs text-brand" id="detailLieu">-</p>
+                </div>
+
+                <div>
+                    <p class="text-xs text-textMuted font-bold">Options spéciales :</p>
+                    <p class="font-bold text-xs text-red-500 bg-red-50 p-2 rounded-xl border border-red-100" id="detailOptions">-</p>
+                </div>
+
+                <!-- Raison annulation if status was cancelled -->
+                <div id="detailReasonContainer" class="hidden">
+                    <p class="text-xs text-red-500 font-bold">Raison d'annulation :</p>
+                    <p class="text-xs italic text-textMuted mt-1" id="detailReason">-</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ANNULER COMMANDE -->
+    <div id="modalCancelCmd" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-[2rem] w-full max-w-sm shadow-2xl p-6 relative">
+            <button onclick="closeModalCancelCmd()" class="absolute top-4 right-4 w-8 h-8 bg-gray-100 text-textMuted rounded-full flex items-center justify-center hover:bg-gray-200 transition"><i class="fa-solid fa-xmark text-sm"></i></button>
+            <div class="w-12 h-12 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center mb-4"><i class="fa-solid fa-ban text-xl"></i></div>
+            <h3 class="font-extrabold text-xl mb-1">Annuler la commande ?</h3>
+            <p class="text-xs text-textMuted mb-6">Veuillez indiquer la raison de l'annulation. L'employé sera notifié et remboursé.</p>
+            
+            <form onsubmit="submitCancelCmd(event)">
+                <input type="hidden" id="cancelCmdId">
+                <div class="mb-4">
+                    <label class="text-xs font-bold text-textMuted block mb-1.5">Raison de l'annulation</label>
+                    <textarea id="cancelReason" required rows="3" class="w-full bg-surface border border-gray-200 rounded-xl px-4 py-2.5 text-xs font-bold focus:outline-none focus:border-brand transition resize-none" placeholder="Ex: Plat en rupture de stock, cuisine fermée..."></textarea>
+                </div>
+                <div class="flex space-x-3">
+                    <button type="button" onclick="closeModalCancelCmd()" class="flex-1 h-11 bg-gray-100 text-textMuted rounded-xl font-bold hover:bg-gray-200 transition text-sm">Fermer</button>
+                    <button type="submit" class="flex-1 h-11 bg-red-500 text-white rounded-xl font-bold hover:-translate-y-0.5 transition shadow-lg shadow-red-500/20 text-sm">Confirmer l'annulation</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL REUTILISER MENU -->
+    <div id="modalReuseMenu" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-[2rem] w-full max-w-sm shadow-2xl p-6 relative">
+            <button onclick="closeModalReuseMenu()" class="absolute top-4 right-4 w-8 h-8 bg-gray-100 text-textMuted rounded-full flex items-center justify-center hover:bg-gray-200 transition"><i class="fa-solid fa-xmark text-sm"></i></button>
+            <div class="w-12 h-12 bg-brandLight text-brand rounded-2xl flex items-center justify-center mb-4"><i class="fa-solid fa-rotate-left text-xl"></i></div>
+            <h3 class="font-extrabold text-xl mb-1">Réutiliser ce Menu</h3>
+            <p class="text-xs text-textMuted mb-6">Copie tous les repas de ce jour vers une nouvelle date de planification.</p>
+            
+            <form onsubmit="submitReuseMenu(event)">
+                <input type="hidden" id="reuseSrcDate">
+                <div class="mb-4">
+                    <label class="text-xs font-bold text-textMuted block mb-1.5">Nouvelle date de planification</label>
+                    <input type="date" id="reuseDestDate" required class="w-full bg-surface border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-bold focus:outline-none focus:border-brand transition">
+                </div>
+                <div class="flex space-x-3">
+                    <button type="button" onclick="closeModalReuseMenu()" class="flex-1 h-11 bg-gray-100 text-textMuted rounded-xl font-bold hover:bg-gray-200 transition text-sm">Fermer</button>
+                    <button type="submit" id="btnSubmitReuseMenu" class="flex-1 h-11 bg-brand text-white rounded-xl font-bold hover:-translate-y-0.5 transition shadow-lg shadow-brand/20 text-sm">Dupliquer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
     <script>
+        const API_URL = 'http://127.0.0.1:8000/api';
+        let currentUser = null;
+        let allPlats = [];
         let allMenus = [];
         let allReservations = [];
+        let notifications = [];
+        let activeFilter = 'tous';
+        let activeMenuSubTab = 'active';
+
+        function logout(){localStorage.clear();window.location.href='index.html';}
+        function getUser(){const u=localStorage.getItem('user');return u?JSON.parse(u):null;}
+
+        async function req(endpoint, method='GET', data=null, isFormData=false) {
+            const h = {};
+            const tk = localStorage.getItem('token');
+            if(tk) h['Authorization'] = `Bearer ${tk}`;
+            
+            if(!isFormData) {
+                h['Content-Type'] = 'application/json';
+            }
+
+            const cfg = {method, headers:h};
+            if(data) {
+                cfg.body = isFormData ? data : JSON.stringify(data);
+            }
+
+            const r = await fetch(API_URL+endpoint, cfg);
+            const j = await r.json();
+            if(!r.ok) throw new Error(j.message||j.detail||j.error||'Erreur serveur');
+            return j;
+        }
+
+        const TABS = ['stats', 'plats', 'menus', 'commandes'];
+        function showTab(tab) {
+            TABS.forEach(t=>{
+                const el=document.getElementById('tab-'+t);
+                const btn=document.getElementById('nav-'+t);
+                if(el) el.classList.toggle('hidden',t!==tab);
+                if(btn){
+                    btn.classList.toggle('bg-brandLight',t===tab);
+                    btn.classList.toggle('text-brand',t===tab);
+                    btn.classList.toggle('text-textMuted',t!==tab);
+                }
+            });
+            const titles = {stats:"Tableau de Bord", plats:"Gestion des Plats", menus:"Menu du Jour", commandes:"Commandes du jour"};
+            document.getElementById('headerTitle').textContent = titles[tab] || "Espace Cuisine";
+        }
 
         document.addEventListener('DOMContentLoaded', async () => {
-            const user = getUser();
-            if(user) {
-                const init = (user.prenom || 'C')[0];
-                document.getElementById('desktopAvatar').textContent = init;
-                document.getElementById('mobileAvatar').textContent = init;
-                document.getElementById('desktopUserName').textContent = user.prenom + ' ' + user.nom;
-                document.getElementById('mobileUserName').textContent = user.prenom;
+            currentUser = getUser();
+            if(currentUser) {
+                const init = (currentUser.prenom || 'C')[0].toUpperCase();
+                document.querySelectorAll('.u-avatar').forEach(el=>el.textContent=init);
+                document.querySelectorAll('.u-name').forEach(el=>el.textContent=currentUser.prenom+' '+currentUser.nom);
             }
+            // Bloquer les dates passées dans le formulaire de planification
+            const d = new Date();
+            const todayMin = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+            const menuDateInput = document.getElementById('menuDate');
+            if(menuDateInput) {
+                menuDateInput.min = todayMin;
+                menuDateInput.value = todayMin; // Pré-remplir avec aujourd'hui
+            }
+            showTab('stats');
             await loadData();
+            
+            // Auto refreshes
+            setInterval(loadData, 30000);
         });
 
         async function loadData() {
             try {
-                const resMenus = await fetchAPI('/cuisinier/menus/');
+                // Fetch Plats
+                const resPlats = await req('/plats/');
+                allPlats = resPlats.data || [];
+                
+                // Fetch Menus
+                const resMenus = await req('/cuisinier/menus/');
                 allMenus = resMenus.data || [];
-                
-                const resRes = await fetchAPI('/cuisinier/reservations/');
+
+                // Fetch Reservations
+                const resRes = await req('/cuisinier/reservations/');
                 allReservations = resRes.data || [];
-                
+
+                // Fetch Notifications
+                const resNotifs = await req('/notifications/');
+                notifications = resNotifs.data || [];
+
                 renderDashboard();
             } catch(e) {
-                console.error("Erreur", e);
+                showToast("Erreur de synchronisation : " + e.message, "error");
             }
         }
 
         function renderDashboard() {
-            // Filtrer pour aujourd'hui seulement
-            const todayStr = new Date().toISOString().split('T')[0];
+            const d = new Date();
+            const todayStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
             
-            // Stats & Réservations pour aujourd'hui
-            let totalRes = 0;
-            let totalPret = 0;
-            let totalPrep = 0;
+            // ════ RENDER TAB 1: STATS ════
+            const resToday = allReservations.filter(r => r.menu_jour_detail.date_menu === todayStr);
+            const activeCmds = resToday.filter(r => r.statut !== 'annule');
+            const pending = activeCmds.filter(r => r.statut === 'en_attente').length;
+            const prepared = activeCmds.filter(r => r.statut === 'prepare' || r.statut === 'consomme').length;
+            const cancelled = resToday.filter(r => r.statut === 'annule').length;
+            const total = resToday.length;
 
-            const resToday = allReservations.filter(r => r.menu_jour_detail.date_menu === todayStr && r.statut !== 'annule');
-            totalRes = resToday.length;
-            totalPret = resToday.filter(r => r.statut === 'prepare' || r.statut === 'consomme').length;
-            totalPrep = resToday.filter(r => r.statut === 'en_attente').length;
+            document.getElementById('statTotalCmd').textContent = total;
+            document.getElementById('statPrep').textContent = `${pending} / ${prepared}`;
+            
+            const cancelRate = total > 0 ? Math.round((cancelled / total) * 100) : 0;
+            document.getElementById('statTauxAnnulation').textContent = `${cancelRate}%`;
 
-            document.getElementById('kpiTotal').textContent = totalRes;
-            document.getElementById('kpiPret').textContent = totalPret;
-            document.getElementById('kpiPrep').textContent = totalPrep;
-
-            // Grouper les réservations par menu_jour_id pour le tableau
-            const grouped = {};
-            resToday.forEach(r => {
-                const m_id = r.menu_jour_detail.id;
-                if(!grouped[m_id]) {
-                    grouped[m_id] = {
-                        plat: r.menu_jour_detail.plat_detail,
-                        total: 0,
-                        pret: 0,
-                        reservations_en_attente: []
-                    };
-                }
-                grouped[m_id].total++;
-                if(r.statut === 'prepare' || r.statut === 'consomme') {
-                    grouped[m_id].pret++;
-                } else if(r.statut === 'en_attente') {
-                    grouped[m_id].reservations_en_attente.push(r);
-                }
+            // Compute most ordered plat today (or overall if today is empty)
+            const counts = {};
+            allReservations.filter(r => r.statut !== 'annule').forEach(r => {
+                const lib = r.menu_jour_detail?.plat_detail?.libelle || 'Plat';
+                counts[lib] = (counts[lib] || 0) + 1;
             });
+            const sortedFavoris = Object.entries(counts).sort((a,b) => b[1] - a[1]);
+            const mostOrdered = sortedFavoris[0] ? `${sortedFavoris[0][0]} (${sortedFavoris[0][1]})` : '-';
+            document.getElementById('statMostOrdered').textContent = mostOrdered;
 
-            const tbody = document.getElementById('tableBody');
-            if(Object.keys(grouped).length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-textMuted font-bold">Aucune réservation pour aujourd'hui.</td></tr>`;
+            // Render Favoris list with bars
+            const favorisContainer = document.getElementById('favorisList');
+            if(sortedFavoris.length === 0) {
+                favorisContainer.innerHTML = `<p class="text-xs text-textMuted">Pas encore de statistiques.</p>`;
             } else {
-                tbody.innerHTML = Object.values(grouped).map(g => {
-                    const p = g.plat;
-                    const img = p.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&w=100&q=80';
-                    const progress = g.total > 0 ? Math.round((g.pret / g.total) * 100) : 0;
-                    const color = progress === 100 ? 'bg-success text-success' : 'bg-brand text-brand';
-
+                const max = sortedFavoris[0][1];
+                favorisContainer.innerHTML = sortedFavoris.slice(0, 4).map(([name, qty]) => {
+                    const pct = max > 0 ? Math.round((qty / max) * 100) : 0;
                     return `
-                    <tr class="hover:bg-gray-50/50 transition">
-                        <td class="p-4">
-                            <div class="flex items-center">
-                                <img src="${img}" class="w-10 h-10 rounded-xl object-cover mr-3">
-                                <div><p class="font-bold text-textDark">${p.libelle}</p></div>
-                            </div>
-                        </td>
-                        <td class="p-4 text-center font-extrabold text-lg text-textDark">${g.total}</td>
-                        <td class="p-4 text-center">
-                            <div class="flex items-center justify-center space-x-3">
-                                <span class="font-bold text-lg">${g.pret}</span>
-                                ${g.reservations_en_attente.length > 0 ? 
-                                    `<button onclick="markOneReady(${g.reservations_en_attente[0].id})" class="px-3 py-1 bg-brandLight text-brand rounded-lg font-bold text-xs hover:bg-brand hover:text-white transition">Prêt +1</button>` 
-                                    : `<span class="px-3 py-1 bg-green-50 text-success rounded-lg font-bold text-xs"><i class="fa-solid fa-check"></i> Terminé</span>`}
-                            </div>
-                        </td>
-                        <td class="p-4 text-right">
-                            <div class="flex items-center justify-end space-x-3">
-                                <div class="w-24 h-2 bg-gray-100 rounded-full overflow-hidden">
-                                    <div class="h-full ${color.split(' ')[0]} rounded-full" style="width: ${progress}%"></div>
-                                </div>
-                                <span class="text-xs font-bold ${color.split(' ')[1]}">${progress}%</span>
-                            </div>
-                        </td>
-                    </tr>`;
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs font-bold">
+                            <span class="truncate max-w-[150px]">${name}</span>
+                            <span class="text-brand">${qty} portions</span>
+                        </div>
+                        <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+                            <div class="h-full bg-brand rounded-full" style="width: ${pct}%"></div>
+                        </div>
+                    </div>`;
                 }).join('');
             }
 
-            // Rendu des menus de la semaine
-            const menusList = document.getElementById('menusList');
-            menusList.innerHTML = allMenus.map(m => {
-                const isToday = m.date_menu === todayStr;
-                const isEpuise = m.statut === 'epuise';
+            // Render Notifications List
+            const notifsContainer = document.getElementById('statNotifications');
+            if(notifications.length === 0) {
+                notifsContainer.innerHTML = `<p class="text-sm text-textMuted py-4">Aucune notification.</p>`;
+            } else {
+                notifsContainer.innerHTML = notifications.slice(0, 5).map(n => `
+                <div class="p-3 bg-surface border border-gray-100 rounded-2xl flex justify-between items-start">
+                    <div class="space-y-1">
+                        <p class="text-xs font-bold ${!n.is_read?'text-brand':'text-textDark'}">${n.titre}</p>
+                        <p class="text-[10px] text-textMuted">${n.message}</p>
+                        <p class="text-[9px] text-gray-400">${new Date(n.created_at).toLocaleDateString('fr-FR', {hour:'2-digit', minute:'2-digit'})}</p>
+                    </div>
+                    ${!n.is_read ? `<button onclick="markNotificationRead(${n.id})" class="text-[10px] bg-brandLight text-brand px-2 py-1 rounded-lg font-bold">Lire</button>` : ''}
+                </div>`).join('');
+            }
+
+            // Populate Plat Select in planning form
+            // Populate Plat list in planning form
+            const selectionContainer = document.getElementById('platSelectionList');
+            if(allPlats.length === 0) {
+                selectionContainer.innerHTML = `<p class="text-xs text-textMuted py-4 text-center">Aucun plat dans le catalogue.</p>`;
+            } else {
+                const cats = {
+                    plat: "Plats Principaux",
+                    entree: "Entrées",
+                    dessert: "Desserts",
+                    boisson: "Boissons"
+                };
+                
+                let html = '';
+                Object.entries(cats).forEach(([type, label]) => {
+                    const typePlats = allPlats.filter(p => p.type_plat === type);
+                    if(typePlats.length > 0) {
+                        html += `
+                        <div class="pt-3 first:pt-0">
+                            <h4 class="text-[10px] font-extrabold text-brand uppercase tracking-wider mb-2">${label}</h4>
+                            <div class="space-y-2">
+                                ${typePlats.map(p => `
+                                    <div class="space-y-1.5">
+                                        <div class="flex items-center space-x-2.5">
+                                            <input type="checkbox" name="selectedPlats" value="${p.id}" onchange="togglePlatInputs(${p.id})" id="chk-plat-${p.id}" class="rounded border-gray-300 text-brand focus:ring-brand w-3.5 h-3.5 transition">
+                                            <label for="chk-plat-${p.id}" class="text-xs font-bold text-textDark cursor-pointer truncate flex-1">${p.libelle}</label>
+                                        </div>
+                                        <div id="inputs-plat-${p.id}" class="hidden grid grid-cols-2 gap-2 pl-6 pb-2 transition-all">
+                                            <div>
+                                                <label class="text-[9px] font-bold text-textMuted block mb-0.5">Prix (CFA)</label>
+                                                <input type="number" id="price-plat-${p.id}" value="2000" min="100" class="w-full bg-surface border border-gray-200 rounded-lg px-2.5 py-1 text-xs font-bold focus:outline-none focus:border-brand">
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-bold text-textMuted block mb-0.5">Stock</label>
+                                                <input type="number" id="qty-plat-${p.id}" value="50" min="1" class="w-full bg-surface border border-gray-200 rounded-lg px-2.5 py-1 text-xs font-bold focus:outline-none focus:border-brand">
+                                            </div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>`;
+                    }
+                });
+                selectionContainer.innerHTML = html;
+            }
+
+            // ════ RENDER TAB 2: PLATS ════
+            filterPlatsCatalogue();
+
+            // ════ RENDER TAB 3: MENUS ════
+            renderMenusScheduled();
+
+            // ════ RENDER TAB 4: COMMANDES ════
+            renderCommandesTable();
+        }
+
+        // --- PLAT CATALOGUE ACTIONS ---
+        function filterPlatsCatalogue() {
+            const query = document.getElementById('searchPlats').value.toLowerCase().trim();
+            const grid = document.getElementById('platsCatalogueGrid');
+            
+            const filtered = allPlats.filter(p => p.libelle.toLowerCase().includes(query) || p.description.toLowerCase().includes(query));
+            
+            if(filtered.length === 0) {
+                grid.innerHTML = `<div class="col-span-4 text-center py-10 text-textMuted font-bold">Aucun plat dans le catalogue.</div>`;
+                return;
+            }
+
+            const tc={'entree':'text-blue-600 bg-blue-50','plat':'text-brand bg-brandLight','dessert':'text-purple-600 bg-purple-50','boisson':'text-green-600 bg-green-50'};
+            const tl={'entree':'Entrée','plat':'Plat','dessert':'Dessert','boisson':'Boisson'};
+
+            grid.innerHTML = filtered.map(p => {
+                const img = getImageUrl(p.image);
                 return `
-                <div class="bg-white p-4 rounded-2xl border ${isToday ? 'border-brand/50 shadow-md relative' : 'border-gray-100 shadow-sm opacity-90'}">
-                    ${isToday ? `<span class="absolute top-0 right-0 bg-brand text-white text-[10px] font-bold px-2 py-1 rounded-bl-lg rounded-tr-2xl">Aujourd'hui</span>` : ''}
-                    <p class="text-[10px] text-textMuted font-bold uppercase mb-1">${m.date_menu}</p>
-                    <h4 class="font-bold text-sm text-textDark mb-2 line-clamp-1">${m.plat_detail?.libelle || 'Plat'}</h4>
-                    ${!isEpuise ? 
-                        `<button onclick="markMenuEpuise(${m.id})" class="w-full py-2 bg-red-50 text-red-500 rounded-xl text-xs font-bold hover:bg-red-500 hover:text-white transition">Signaler Épuisé</button>` 
-                        : `<button disabled class="w-full py-2 bg-gray-100 text-textMuted rounded-xl text-xs font-bold"><i class="fa-solid fa-ban"></i> Indisponible</button>`}
+                <div class="bg-white rounded-3xl border border-gray-100 overflow-hidden flex flex-col shadow-sm transition hover:shadow-md">
+                    <div class="h-36 relative">
+                        <img src="${img}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80';" class="w-full h-full object-cover">
+                        <span class="absolute top-3 left-3 text-[10px] font-bold px-2 py-1 rounded-lg ${tc[p.type_plat]||'bg-gray-100'}">${tl[p.type_plat]||'Plat'}</span>
+                    </div>
+                    <div class="p-4 flex-1 flex flex-col justify-between space-y-3">
+                        <div>
+                            <h4 class="font-extrabold text-sm text-textDark mb-1 line-clamp-1">${p.libelle}</h4>
+                            <p class="text-xs text-textMuted line-clamp-2">${p.description}</p>
+                        </div>
+                        <div class="flex space-x-2 pt-2 border-t border-gray-50">
+                            <button onclick="openModalPlat(${p.id})" class="flex-1 h-9 bg-gray-50 text-textMuted hover:bg-brand hover:text-white rounded-xl text-xs font-bold transition flex items-center justify-center"><i class="fa-solid fa-pen mr-1.5"></i>Modifier</button>
+                            <button onclick="deletePlat(${p.id})" class="w-9 h-9 bg-red-50 text-red-500 hover:bg-red-500 hover:text-white rounded-xl flex items-center justify-center transition"><i class="fa-solid fa-trash text-xs"></i></button>
+                        </div>
+                    </div>
                 </div>`;
             }).join('');
         }
 
-        async function markOneReady(reservationId) {
+        function openModalPlat(id = null) {
+            const modal = document.getElementById('modalPlat');
+            const form = document.getElementById('formPlat');
+            form.reset();
+            document.getElementById('platError').classList.add('hidden');
+            
+            if(id) {
+                const p = allPlats.find(x => x.id === id);
+                if(p) {
+                    document.getElementById('platId').value = p.id;
+                    document.getElementById('platLibelle').value = p.libelle;
+                    document.getElementById('platDesc').value = p.description;
+                    document.getElementById('platType').value = p.type_plat;
+                    document.getElementById('platIngredients').value = p.ingredients || '';
+                    document.getElementById('modalPlatTitle').textContent = "Modifier le Plat";
+                    
+                    // En édition, l'image n'est pas obligatoire
+                    document.getElementById('platImageFile').required = false;
+                    document.getElementById('imgReqStar').classList.add('hidden');
+                }
+            } else {
+                document.getElementById('platId').value = '';
+                document.getElementById('modalPlatTitle').textContent = "Ajouter un nouveau plat";
+                
+                // En création, l'image est obligatoire
+                document.getElementById('platImageFile').required = true;
+                document.getElementById('imgReqStar').classList.remove('hidden');
+            }
+            modal.classList.remove('hidden');
+        }
+
+        function closeModalPlat() {
+            document.getElementById('modalPlat').classList.add('hidden');
+        }
+
+        async function submitPlat(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmitPlat');
+            const errEl = document.getElementById('platError');
+            btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Enregistrement...';
+            errEl.classList.add('hidden');
+
+            const id = document.getElementById('platId').value;
+            const libelle = document.getElementById('platLibelle').value;
+            const desc = document.getElementById('platDesc').value;
+            const type = document.getElementById('platType').value;
+            const ingredients = document.getElementById('platIngredients').value;
+            const imageFile = document.getElementById('platImageFile').files[0];
+
+            const formData = new FormData();
+            formData.append('libelle', libelle);
+            formData.append('description', desc);
+            formData.append('type_plat', type);
+            formData.append('ingredients', ingredients);
+            if(imageFile) {
+                formData.append('image', imageFile);
+            }
+
+            const url = id ? `/plats/${id}/` : '/plats/';
+            const method = id ? 'PUT' : 'POST';
+
             try {
-                await fetchAPI(`/cuisinier/reservations/${reservationId}/update-status/`, 'POST', { statut: 'prepare' });
-                // Recharger les données pour mettre à jour l'UI
+                await req(url, method, formData, true);
+                showToast(id ? 'Plat mis à jour !' : 'Nouveau plat créé !', 'success');
+                closeModalPlat();
+                await loadData();
+            } catch(err) {
+                errEl.textContent = err.message;
+                errEl.classList.remove('hidden');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-floppy-disk mr-2"></i>Enregistrer le plat';
+            }
+        }
+
+        async function deletePlat(id) {
+            if(!confirm("Supprimer ce plat définitivement du catalogue ?")) return;
+            try {
+                await req(`/plats/${id}/`, 'DELETE');
+                showToast("Plat supprimé.", "info");
                 await loadData();
             } catch(e) {
-                alert("Erreur lors de la mise à jour: " + e.message);
+                showToast("Impossible de supprimer le plat : il est probablement référencé dans un menu existant.", "error");
+            }
+        }
+
+        // --- MENU PLANNING ACTIONS ---
+        function togglePlatInputs(platId) {
+            const chk = document.getElementById(`chk-plat-${platId}`);
+            const inputs = document.getElementById(`inputs-plat-${platId}`);
+            if(chk && inputs) {
+                inputs.classList.toggle('hidden', !chk.checked);
+            }
+        }
+
+        async function submitMenu(e) {
+            e.preventDefault();
+            const date = document.getElementById('menuDate').value;
+            const chks = document.querySelectorAll('input[name="selectedPlats"]:checked');
+            
+            if(chks.length === 0) {
+                showToast("Veuillez sélectionner au moins un plat, boisson ou dessert.", "error");
+                return;
+            }
+            
+            const btn = document.getElementById('btnSubmitMenu');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Publication...';
+            
+            try {
+                const promises = Array.from(chks).map(chk => {
+                    const platId = chk.value;
+                    const price = parseFloat(document.getElementById(`price-plat-${platId}`).value) || 2000;
+                    const qty = parseInt(document.getElementById(`qty-plat-${platId}`).value) || 50;
+                    
+                    return req('/menus/', 'POST', {
+                        date_menu: date,
+                        plat: parseInt(platId),
+                        prix: price,
+                        quantite_disponible: qty,
+                        cuisinier: currentUser.id
+                    });
+                });
+                
+                await Promise.all(promises);
+                showToast("Le menu complet a été publié avec succès !", "success");
+                await loadData();
+            } catch(err) {
+                showToast("Erreur lors de la publication : " + err.message, "error");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-regular fa-calendar-check mr-2"></i>Publier le menu complet';
             }
         }
 
         async function markMenuEpuise(menuId) {
-            if(!confirm("Êtes-vous sûr de vouloir marquer ce menu comme épuisé ? Les employés ne pourront plus le commander.")) return;
             try {
-                await fetchAPI(`/menus/${menuId}/`, 'PATCH', { statut: 'epuise' });
+                await req(`/menus/${menuId}/`, 'PATCH', { statut: 'epuise' });
+                showToast("Menu signalé épuisé.", "info");
                 await loadData();
             } catch(e) {
-                alert("Erreur: " + e.message);
+                showToast("Erreur: " + e.message, "error");
+            }
+        }
+
+        async function deleteMenu(menuId) {
+            if(!confirm("Supprimer ce repas du planning ? Les employés ne pourront plus le commander.")) return;
+            try {
+                await req(`/menus/${menuId}/`, 'DELETE');
+                showToast("Repas retiré du planning.", "info");
+                await loadData();
+            } catch(e) {
+                showToast("Erreur lors de la suppression : " + e.message, "error");
+            }
+        }
+
+        // --- COMMANDES (TICKETS) ACTIONS ---
+        function filterCommandes(filter) {
+            activeFilter = filter;
+            document.querySelectorAll('.btn-cmd-filter').forEach(btn => {
+                const isActive = (btn.textContent.toLowerCase().includes(filter) || (filter==='tous' && btn.textContent==='Tous') || (filter==='prepare' && btn.textContent==='Prêts') || (filter==='consomme' && btn.textContent==='Servis') || (filter==='annule' && btn.textContent==='Annulés'));
+                btn.classList.toggle('bg-brand', isActive);
+                btn.classList.toggle('text-white', isActive);
+                btn.classList.toggle('text-textMuted', !isActive);
+                btn.classList.toggle('hover:bg-gray-50', !isActive);
+            });
+            renderCommandesTable();
+        }
+
+        function renderCommandesTable() {
+            const d = new Date();
+            const todayStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+            const resToday = allReservations.filter(r => r.menu_jour_detail.date_menu === todayStr);
+            
+            let filtered = resToday;
+            if(activeFilter !== 'tous') {
+                if(activeFilter === 'en_attente') {
+                    filtered = resToday.filter(r => r.statut === 'en_attente');
+                } else if(activeFilter === 'prepare') {
+                    filtered = resToday.filter(r => r.statut === 'prepare');
+                } else if(activeFilter === 'consomme') {
+                    filtered = resToday.filter(r => r.statut === 'consomme');
+                } else if(activeFilter === 'annule') {
+                    filtered = resToday.filter(r => r.statut === 'annule');
+                }
+            }
+
+            const grid = document.getElementById('commandesGrid');
+            if(filtered.length === 0) {
+                grid.innerHTML = `
+                <div class="col-span-3 py-10 bg-white border border-gray-100 rounded-3xl text-center text-textMuted font-bold">
+                    Aucune commande trouvée pour ce filtre.
+                </div>`;
+                return;
+            }
+
+            const sc={'en_attente':'bg-amber-100 text-amber-700','prepare':'bg-blue-50 text-blue-600','consomme':'bg-green-50 text-success','annule':'bg-red-50 text-red-500'};
+            const sl={'en_attente':'En attente','prepare':'Prêt (Retrait)','consomme':'Livré / Servi','annule':'Annulé'};
+
+            grid.innerHTML = filtered.map((r, index) => {
+                const p = r.menu_jour_detail?.plat_detail || {};
+                const emp = r.employe_detail || {};
+                const name = emp.prenom + ' ' + (emp.nom || '');
+                const time = new Date(r.date_reservation).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+                const svcIcon = {'sur_place':'fa-chair','emporter':'fa-bag-shopping','livraison':'fa-motorcycle'}[r.type_service] || 'fa-utensils';
+                
+                // Options specials highlight
+                let optionsDiv = '';
+                if(r.options_personnalisation) {
+                    let opts = r.options_personnalisation;
+                    if(opts.startsWith('Livraison:')) {
+                        const parts = opts.split('|');
+                        opts = parts.length > 1 ? parts.slice(1).join('|').trim() : '';
+                    }
+                    if(opts) {
+                        optionsDiv = `<p class="mt-2 text-xs font-bold text-red-500 bg-red-50 border border-red-100 px-2.5 py-1.5 rounded-xl"><i class="fa-solid fa-triangle-exclamation mr-1.5"></i>${opts}</p>`;
+                    }
+                }
+
+                // Actions buttons
+                let actionBtn = '';
+                if(r.statut === 'en_attente') {
+                    actionBtn = `
+                    <div class="flex space-x-2 w-full mt-4">
+                        <button onclick="updateReservationStatus(${r.id}, 'prepare')" class="flex-1 h-10 bg-brand text-white rounded-xl text-xs font-bold hover:bg-orange-600 transition flex items-center justify-center"><i class="fa-solid fa-check mr-1.5"></i>Prêt</button>
+                        <button onclick="openCancelModal(${r.id})" class="h-10 px-3 bg-red-50 text-red-500 hover:bg-red-500 hover:text-white rounded-xl text-xs font-bold transition flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+                    </div>`;
+                } else if(r.statut === 'prepare') {
+                    actionBtn = `
+                    <button onclick="updateReservationStatus(${r.id}, 'consomme')" class="w-full mt-4 h-10 bg-green-50 text-success hover:bg-success hover:text-white rounded-xl text-xs font-bold transition flex items-center justify-center"><i class="fa-solid fa-circle-check mr-1.5"></i>Servir / Livrer</button>`;
+                }
+
+                return `
+                <div class="bg-white rounded-3xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition relative flex flex-col justify-between ticket-enter" style="animation-delay: ${index * 0.05}s">
+                    <div onclick="openModalCmdDetail(${r.id})" class="cursor-pointer space-y-3">
+                        <div class="flex justify-between items-start">
+                            <span class="text-[10px] font-bold text-textMuted uppercase flex items-center"><i class="fa-solid ${svcIcon} mr-1.5 text-brand"></i> ${r.type_service}</span>
+                            <span class="px-2 py-0.5 ${sc[r.statut]||'bg-gray-100'} rounded-lg text-[9px] font-extrabold whitespace-nowrap">${sl[r.statut]}</span>
+                        </div>
+                        <div>
+                            <h4 class="font-extrabold text-sm text-textDark">${p.libelle || 'Plat'}</h4>
+                            <p class="text-[10px] text-textMuted font-bold mt-1"><i class="fa-regular fa-user mr-1"></i> ${name} · ${time}</p>
+                        </div>
+                        ${optionsDiv}
+                    </div>
+                    <div>
+                        ${actionBtn}
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        async function updateReservationStatus(resId, newStatus) {
+            try {
+                await req(`/cuisinier/reservations/${resId}/update-status/`, 'POST', { statut: newStatus });
+                showToast(`Commande mise à jour !`, 'success');
+                await loadData();
+            } catch(e) {
+                showToast(e.message, 'error');
+            }
+        }
+
+        // Detail Command Modal
+        function openModalCmdDetail(resId) {
+            const r = allReservations.find(x => x.id === resId);
+            if(!r) return;
+            const p = r.menu_jour_detail?.plat_detail || {};
+            const emp = r.employe_detail || {};
+            
+            document.getElementById('detailEmpAvatar').textContent = (emp.prenom || 'U')[0].toUpperCase();
+            document.getElementById('detailEmpName').textContent = emp.prenom + ' ' + (emp.nom || '');
+            document.getElementById('detailEmpPoste').textContent = emp.poste || 'Employé';
+            
+            document.getElementById('detailPlat').textContent = p.libelle || '-';
+            document.getElementById('detailHeure').textContent = new Date(r.date_reservation).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+            
+            const badge = document.getElementById('detailStatutBadge');
+            const sl={'en_attente':'En attente','prepare':'Prêt (Retrait)','consomme':'Livré / Servi','annule':'Annulé'};
+            const sc={'en_attente':'bg-amber-100 text-amber-700','prepare':'bg-blue-50 text-blue-600','consomme':'bg-green-50 text-success','annule':'bg-red-50 text-red-500'};
+            badge.textContent = sl[r.statut] || r.statut;
+            badge.className = `inline-block px-2.5 py-1 rounded-full text-[10px] font-bold ` + sc[r.statut];
+
+            const lieuCont = document.getElementById('detailLieuContainer');
+            if(r.type_service === 'livraison' && r.lieu_livraison) {
+                lieuCont.classList.remove('hidden');
+                document.getElementById('detailLieu').textContent = r.lieu_livraison;
+            } else {
+                lieuCont.classList.add('hidden');
+            }
+
+            document.getElementById('detailOptions').textContent = r.options_personnalisation || 'Aucune option spéciale';
+            
+            const reasonCont = document.getElementById('detailReasonContainer');
+            if(r.statut === 'annule') {
+                reasonCont.classList.remove('hidden');
+                // Extract reason if structured as "[Annulé: reason]" or just show options
+                document.getElementById('detailReason').textContent = "Annulée par la cuisine (notification de remboursement envoyée).";
+            } else {
+                reasonCont.classList.add('hidden');
+            }
+
+            document.getElementById('modalCmdDetail').classList.remove('hidden');
+        }
+
+        function closeModalCmdDetail() {
+            document.getElementById('modalCmdDetail').classList.add('hidden');
+        }
+
+        // Cancel Reservation Modal
+        function openCancelModal(resId) {
+            document.getElementById('cancelCmdId').value = resId;
+            document.getElementById('cancelReason').value = '';
+            document.getElementById('modalCancelCmd').classList.remove('hidden');
+        }
+
+        function closeModalCancelCmd() {
+            document.getElementById('modalCancelCmd').classList.add('hidden');
+        }
+
+        async function submitCancelCmd(e) {
+            e.preventDefault();
+            const resId = document.getElementById('cancelCmdId').value;
+            const reason = document.getElementById('cancelReason').value;
+
+            try {
+                // Post cancellation status
+                await req(`/cuisinier/reservations/${resId}/update-status/`, 'POST', { statut: 'annule' });
+                
+                // Try sending custom notification with reason to the employee
+                const res = allReservations.find(x => x.id == resId);
+                if(res && res.employe) {
+                    await req('/notifications/broadcast/', 'POST', {
+                        titre: "Commande Annulée - Cuisine",
+                        message: `Votre commande pour '${res.menu_jour_detail?.plat_detail?.libelle}' a été annulée. Raison : ${reason}`,
+                        cible: "tous" // Send broadcast or let backend auto notify. In our code, updating status to annule automatically creates a notification. This broadcast is a nice custom fallback.
+                    });
+                }
+
+                showToast("Commande annulée avec succès.", "info");
+                closeModalCancelCmd();
+                await loadData();
+            } catch(e) {
+                showToast("Erreur lors de l'annulation: " + e.message, "error");
+            }
+        }
+
+        // --- NOTIFICATION ACTIONS ---
+        async function markNotificationRead(id) {
+            try {
+                await req(`/notifications/${id}/read/`, 'POST');
+                await loadData();
+            } catch(e) {
+                console.error(e);
+            }
+        }
+
+        function showToast(msg,type='success'){
+            const c={success:'bg-success',error:'bg-red-500',info:'bg-blue-500'};
+            const t=document.createElement('div');
+            t.className=`fixed top-6 left-1/2 -translate-x-1/2 ${c[type]||'bg-gray-800'} text-white px-6 py-3 rounded-2xl shadow-xl text-sm font-bold z-[9999] ticket-enter`;
+            t.innerHTML = `<i class="fa-solid ${type==='success'?'fa-check-circle':type==='error'?'fa-circle-exclamation':'fa-info-circle'} mr-2"></i>${msg}`;
+            document.body.appendChild(t);
+            setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(()=>t.remove(),300);},3500);
+        }
+
+        function getImageUrl(url) {
+            if(!url) return 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80';
+            if(url.startsWith('http://') || url.startsWith('https://')) return url;
+            if(url.startsWith('/media/')) return 'http://127.0.0.1:8000' + url;
+            return 'http://127.0.0.1:8000/media/' + url;
+        }
+
+        function changeMenuSubTab(subTab) {
+            activeMenuSubTab = subTab;
+            const btnActive = document.getElementById('btnMenuSubTab-active');
+            const btnHistory = document.getElementById('btnMenuSubTab-history');
+            
+            if(subTab === 'active') {
+                btnActive.className = "px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-brand shadow-sm transition";
+                btnHistory.className = "px-3 py-1.5 rounded-lg text-xs font-bold text-textMuted hover:bg-gray-50 transition";
+            } else {
+                btnHistory.className = "px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-brand shadow-sm transition";
+                btnActive.className = "px-3 py-1.5 rounded-lg text-xs font-bold text-textMuted hover:bg-gray-50 transition";
+            }
+            renderMenusScheduled();
+        }
+
+        function renderMenusScheduled() {
+            const d = new Date();
+            const todayStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+            const menusScheduledContainer = document.getElementById('menusScheduledList');
+            
+            let filteredMenus = [];
+            if(activeMenuSubTab === 'active') {
+                filteredMenus = allMenus.filter(m => m.date_menu >= todayStr);
+            } else {
+                filteredMenus = allMenus.filter(m => m.date_menu < todayStr);
+            }
+            
+            // Group by date
+            const grouped = {};
+            filteredMenus.forEach(m => {
+                if(!grouped[m.date_menu]) grouped[m.date_menu] = [];
+                grouped[m.date_menu].push(m);
+            });
+            
+            const sortedDates = Object.keys(grouped).sort((a, b) => {
+                return activeMenuSubTab === 'active' ? a.localeCompare(b) : b.localeCompare(a);
+            });
+            
+            if(sortedDates.length === 0) {
+                menusScheduledContainer.innerHTML = `
+                <div class="bg-white border border-gray-100 rounded-3xl p-8 text-center text-textMuted shadow-sm">
+                    <i class="fa-solid fa-calendar-xmark text-3xl opacity-20 block mb-2 text-brand"></i>
+                    <p class="font-bold text-sm">Aucun menu planifié dans cette section.</p>
+                    <p class="text-[11px] mt-1">Utilisez le formulaire à gauche pour planifier vos repas.</p>
+                </div>`;
+                return;
+            }
+            
+            menusScheduledContainer.innerHTML = sortedDates.map(dt => {
+                const list = grouped[dt];
+                const dateObj = new Date(dt);
+                const dateLabel = dateObj.toLocaleDateString('fr-FR', {weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'});
+                const isToday = dt === todayStr;
+                
+                const platRows = list.map(m => {
+                    const p = m.plat_detail || {};
+                    const isEpuise = m.statut === 'epuise';
+                    const img = getImageUrl(p.image);
+                    return `
+                    <div class="flex items-center gap-4 bg-gray-50/50 p-3 rounded-2xl border border-gray-100">
+                        <img src="${img}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=150&q=80';" class="w-12 h-12 rounded-xl object-cover flex-shrink-0">
+                        <div class="flex-1 min-w-0">
+                            <h5 class="font-bold text-xs text-textDark truncate">${p.libelle}</h5>
+                            <p class="text-[10px] text-textMuted font-bold mt-0.5">${parseFloat(m.prix)} CFA · Stock: ${m.quantite_disponible} portions</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            ${!isEpuise ? 
+                                `<button onclick="markMenuEpuise(${m.id})" class="h-7 px-2.5 bg-red-50 text-red-500 rounded-lg text-[10px] font-bold hover:bg-red-500 hover:text-white transition flex items-center"><i class="fa-solid fa-ban mr-1.5"></i>Épuisé</button>`
+                                : `<span class="px-2.5 py-1 bg-gray-100 text-textMuted text-[10px] font-bold rounded-lg flex items-center"><i class="fa-solid fa-ban mr-1.5"></i>Indisponible</span>`
+                            }
+                            <button onclick="deleteMenu(${m.id})" class="w-7 h-7 bg-red-50/40 text-red-400 rounded-lg text-xs hover:bg-red-500 hover:text-white transition flex items-center justify-center"><i class="fa-regular fa-trash-can"></i></button>
+                        </div>
+                    </div>`;
+                }).join('');
+                
+                return `
+                <div class="bg-white rounded-3xl p-5 border ${isToday ? 'border-brand shadow-sm' : 'border-gray-100'} space-y-4">
+                    <div class="flex justify-between items-center border-b border-gray-100 pb-3 gap-2">
+                        <div class="flex items-center space-x-2 min-w-0">
+                            <span class="w-2.5 h-2.5 ${isToday?'bg-brand animate-pulse':'bg-gray-400'} rounded-full flex-shrink-0"></span>
+                            <h4 class="font-extrabold text-sm text-textDark capitalize truncate">${dateLabel}</h4>
+                            ${isToday ? `<span class="text-[9px] bg-brandLight text-brand font-bold px-2 py-0.5 rounded-lg flex-shrink-0">Aujourd'hui</span>` : ''}
+                        </div>
+                        <button onclick="openReuseModal('${dt}')" class="flex-shrink-0 h-8 px-3 bg-brandLight text-brand rounded-xl text-[10px] font-bold hover:bg-brand hover:text-white transition flex items-center"><i class="fa-solid fa-rotate-left mr-1.5"></i>Réutiliser</button>
+                    </div>
+                    <div class="space-y-2">
+                        ${platRows}
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function openReuseModal(srcDate) {
+            document.getElementById('reuseSrcDate').value = srcDate;
+            document.getElementById('reuseDestDate').value = '';
+            document.getElementById('modalReuseMenu').classList.remove('hidden');
+        }
+
+        function closeModalReuseMenu() {
+            document.getElementById('modalReuseMenu').classList.add('hidden');
+        }
+
+        async function submitReuseMenu(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmitReuseMenu');
+            const srcDate = document.getElementById('reuseSrcDate').value;
+            const destDate = document.getElementById('reuseDestDate').value;
+            
+            if(!destDate) return;
+            
+            // Find all menus for srcDate
+            const srcMenus = allMenus.filter(m => m.date_menu === srcDate);
+            if(srcMenus.length === 0) {
+                showToast("Aucun repas à dupliquer pour cette date.", "error");
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Duplication...';
+            
+            try {
+                // Post all plats to the new date in parallel
+                const promises = srcMenus.map(m => {
+                    const payload = {
+                        date_menu: destDate,
+                        plat: m.plat,
+                        prix: parseFloat(m.prix),
+                        quantite_disponible: parseInt(m.quantite_disponible),
+                        cuisinier: currentUser.id
+                    };
+                    return req('/menus/', 'POST', payload);
+                });
+                
+                await Promise.all(promises);
+                showToast(`Menu du ${srcDate} dupliqué pour le ${destDate} !`, "success");
+                closeModalReuseMenu();
+                await loadData();
+            } catch(err) {
+                showToast("Erreur lors de la duplication : " + err.message, "error");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Dupliquer';
             }
         }
     </script>

@@ -182,3 +182,25 @@ class MenuDetailView(APIView):
                 'data': serializer.data
             })
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @extend_schema(
+        summary="Supprimer un menu du planning (Cuisinier/Gestionnaire)",
+        operation_id="delete_menu",
+        responses={200: OpenApiTypes.OBJECT, 403: OpenApiTypes.OBJECT, 404: OpenApiTypes.OBJECT}
+    )
+    def delete(self, request, pk):
+        if request.user.role not in ['cuisinier', 'gestionnaire', 'administrateur']:
+            return Response(
+                {'message': 'Accès interdit. Seul le personnel autorisé peut supprimer des menus.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        menu = self.get_object(pk)
+        if not menu:
+            return Response({'message': 'Menu introuvable.'}, status=status.HTTP_404_NOT_FOUND)
+
+        menu.delete()
+        return Response({
+            'message': 'Le repas a été retiré du planning avec succès.'
+        }, status=status.HTTP_200_OK)
+

@@ -2,8 +2,17 @@
 const API_URL = 'http://127.0.0.1:8000/api';
 let panier = [];
 let currentUser = null;
-let menusAujourdhui = [];
+let menusAujourdhui = [];       // Menus filtrés (aujourd'hui OU demain selon sélection)
+let allMenusDisponibles = [];   // Tous les menus (aujourd'hui + demain)
 const FRAIS_LIVRAISON = 500; // CFA
+
+// Helper : calculer la date locale au format YYYY-MM-DD
+function getLocalDate(offsetDays=0){
+    const d = new Date();
+    d.setDate(d.getDate() + offsetDays);
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+let selectedMenuDate = getLocalDate(0); // Par défaut = aujourd'hui
 
 async function req(endpoint, method='GET', data=null) {
     const h = {'Content-Type':'application/json'};
@@ -97,14 +106,60 @@ async function submitRecharge(e){
 async function loadMenus() {
     try {
         const r=await req('/menus/');
-        const today=new Date().toISOString().split('T')[0];
-        menusAujourdhui=(r.data||[]).filter(m=>m.date_menu===today);
-        document.getElementById('kpiMenus').textContent=menusAujourdhui.length;
+        const today = getLocalDate(0);
+        const tomorrow = getLocalDate(1);
+        // Stocker tous les menus disponibles (aujourd'hui + demain)
+        allMenusDisponibles = (r.data||[]).filter(m => m.date_menu === today || m.date_menu === tomorrow);
+        // Filtrer selon la date sélectionnée par l'employé
+        menusAujourdhui = allMenusDisponibles.filter(m => m.date_menu === selectedMenuDate);
+        document.getElementById('kpiMenus').textContent = menusAujourdhui.length;
+        // Mettre à jour le sélecteur de date si disponible
+        updateMenuDateSelector(today, tomorrow, allMenusDisponibles);
         renderMenus();
     } catch(e){
         const g=document.getElementById('menuGrid');
         if(g) g.innerHTML=`<p class="col-span-3 text-red-400 font-bold text-sm p-4">${e.message}</p>`;
     }
+}
+
+function updateMenuDateSelector(today, tomorrow, allMenus){
+    const sel = document.getElementById('menuDateSelector');
+    if(!sel) return;
+    const todayCount = allMenus.filter(m=>m.date_menu===today).length;
+    const tomorrowCount = allMenus.filter(m=>m.date_menu===tomorrow).length;
+    sel.innerHTML = '';
+    if(todayCount > 0){
+        const opt = document.createElement('option');
+        opt.value = today;
+        opt.textContent = `Aujourd'hui (${todayCount} plat${todayCount>1?'s':''} disponible${todayCount>1?'s':''})`;      
+        if(selectedMenuDate===today) opt.selected=true;
+        sel.appendChild(opt);
+    }
+    if(tomorrowCount > 0){
+        const opt = document.createElement('option');
+        opt.value = tomorrow;
+        opt.textContent = `Demain – Pré-commande (${tomorrowCount} plat${tomorrowCount>1?'s':''})`;      
+        if(selectedMenuDate===tomorrow) opt.selected=true;
+        sel.appendChild(opt);
+    }
+    // Adapter le header h2 de la section
+    const tabTitle = document.getElementById('menuTabTitle');
+    if(tabTitle){
+        tabTitle.textContent = selectedMenuDate === today ? 'Menu du Jour' : 'Pré-commander pour Demain';
+    }
+}
+
+function switchMenuDate(){
+    const sel = document.getElementById('menuDateSelector');
+    if(!sel) return;
+    selectedMenuDate = sel.value;
+    menusAujourdhui = allMenusDisponibles.filter(m => m.date_menu === selectedMenuDate);
+    panier = []; // Vider le panier lors du changement de date
+    updateCartUI();
+    const today = getLocalDate(0);
+    const tomorrow = getLocalDate(1);
+    updateMenuDateSelector(today, tomorrow, allMenusDisponibles);
+    renderMenus();
 }
 
 function renderMenus(){
@@ -123,10 +178,10 @@ function renderMenus(){
         const item=panier.find(x=>x.id===m.id);
         const qte=item?item.qty:0;
         const epuise=m.statut==='epuise';
-        const img=p.image||'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80';
+        const img=getImageUrl(p.image);
         return `<div class="bg-white rounded-3xl border ${qte>0?'border-brand shadow-md':'border-gray-100'} overflow-hidden flex flex-col transition-all ${epuise?'opacity-60':''}">
             <div class="relative h-40 overflow-hidden cursor-pointer" onclick="openMealDetails(${m.id})">
-                <img src="${img}" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500" alt="${p.libelle}">
+                <img src="${img}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80';" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500" alt="${p.libelle}">
                 ${epuise?`<div class="absolute inset-0 bg-black/40 flex items-center justify-center"><span class="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">Épuisé</span></div>`:''}
                 <span class="absolute top-3 left-3 ${tc[p.type_plat]||'bg-gray-100 text-gray-600'} text-[10px] font-bold px-2 py-1 rounded-full shadow-sm">${tl[p.type_plat]||'Plat'}</span>
                 ${qte>0?`<span class="absolute top-3 right-3 w-6 h-6 bg-brand text-white text-xs font-extrabold rounded-full flex items-center justify-center shadow">${qte}</span>`:''}
@@ -415,7 +470,11 @@ function openMealDetails(menuId){
     if(!m) return;
     const p = m.plat_detail || {};
     
-    document.getElementById('mealImage').src = p.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&q=80';
+    document.getElementById('mealImage').src = getImageUrl(p.image);
+    document.getElementById('mealImage').onerror = function() {
+        this.onerror = null;
+        this.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&q=80';
+    };
     document.getElementById('mealTitle').textContent = p.libelle || 'Plat';
     document.getElementById('mealDesc').textContent = p.description || 'Aucune description fournie.';
     document.getElementById('mealPrice').textContent = parseFloat(m.prix) + ' CFA';
@@ -479,6 +538,37 @@ function renderNotifications(){
 }
 async function markRead(id){try{await req(`/notifications/${id}/read/`,'POST');await loadNotifications();}catch(e){}}
 
+// ─── MESSAGE AU CUISINIER ─────────────────────────────────────────────────────
+function openMsgCook(){
+    const modal = document.getElementById('modalMsgCook');
+    if(modal) modal.classList.remove('hidden');
+}
+function closeMsgCook(){
+    const modal = document.getElementById('modalMsgCook');
+    if(modal) modal.classList.add('hidden');
+    const inp = document.getElementById('msgCookInput');
+    if(inp) inp.value='';
+}
+async function sendMsgToCook(e){
+    e.preventDefault();
+    const msg = document.getElementById('msgCookInput').value.trim();
+    if(!msg) return;
+    const btn = document.getElementById('btnSendMsgCook');
+    btn.disabled=true; btn.innerHTML='<i class="fa-solid fa-spinner fa-spin mr-2"></i>Envoi...';
+    try{
+        await req('/notifications/message-cuisinier/','POST',{
+            message: msg
+        });
+        showToast('Message envoyé à la cuisine !','success');
+        closeMsgCook();
+    }catch(e2){
+        showToast('Erreur : '+e2.message,'error');
+    }finally{
+        btn.disabled=false;
+        btn.innerHTML='<i class="fa-solid fa-paper-plane mr-2"></i>Envoyer';
+    }
+}
+
 // ─── DASHBOARD HOME ───────────────────────────────────────────────────────────
 function renderDashboard(){
     const el=document.getElementById('recentRes');if(!el) return;
@@ -508,4 +598,11 @@ function showToast(msg,type='success'){
     t.className=`fixed top-6 left-1/2 -translate-x-1/2 ${c[type]||'bg-gray-800'} text-white px-6 py-3 rounded-2xl shadow-xl text-sm font-bold z-[9999]`;
     t.textContent=msg;document.body.appendChild(t);
     setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(()=>t.remove(),300);},3500);
+}
+
+function getImageUrl(url) {
+    if(!url) return 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80';
+    if(url.startsWith('http://') || url.startsWith('https://')) return url;
+    if(url.startsWith('/media/')) return 'http://127.0.0.1:8000' + url;
+    return 'http://127.0.0.1:8000/media/' + url;
 }

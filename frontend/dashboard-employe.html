@@ -141,8 +141,14 @@
         <div id="tab-commander" class="hidden p-6 lg:p-8 max-w-6xl mx-auto">
             <div class="relative bg-brand text-white rounded-[2rem] p-8 mb-8 overflow-hidden">
                 <div class="absolute -top-10 -right-10 w-40 h-40 bg-white/10 blob-a"></div>
-                <h2 class="text-2xl font-extrabold relative z-10">Menu du Jour</h2>
+                <h2 id="menuTabTitle" class="text-2xl font-extrabold relative z-10">Menu du Jour</h2>
                 <p class="text-white/70 text-sm mt-1 relative z-10">Sélectionnez vos plats, desserts et boissons.</p>
+                <div class="mt-4 relative z-10">
+                    <select id="menuDateSelector" onchange="switchMenuDate()" class="bg-white/20 backdrop-blur text-white font-bold border border-white/30 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-white transition appearance-none cursor-pointer hover:bg-white/30">
+                        <option>Chargement...</option>
+                    </select>
+                    <p class="text-white/60 text-xs mt-2"><i class="fa-solid fa-circle-info mr-1"></i>Vous pouvez pré-commander pour demain si le menu est disponible.</p>
+                </div>
             </div>
             <div id="menuLoading" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                 <div class="h-56 bg-white rounded-3xl border animate-pulse"></div>
@@ -178,7 +184,12 @@
 
         <!-- ═══ TAB: NOTIFICATIONS ═══ -->
         <div id="tab-notifications" class="hidden p-6 lg:p-8 max-w-3xl mx-auto">
-            <h2 class="text-xl font-extrabold mb-6">Mes Notifications</h2>
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-extrabold">Mes Notifications</h2>
+                <button onclick="openMsgCook()" class="h-10 px-4 bg-brand text-white rounded-2xl font-bold text-xs hover:-translate-y-0.5 transition flex items-center shadow-lg shadow-brand/20">
+                    <i class="fa-solid fa-comment-dots mr-2"></i>Contacter la Cuisine
+                </button>
+            </div>
             <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
                 <div id="notifList"><div class="p-6 text-center text-textMuted text-sm">Chargement...</div></div>
             </div>
@@ -309,6 +320,26 @@
             <button onclick="closeCancel()" class="flex-1 h-11 bg-gray-100 text-textMuted rounded-xl font-bold hover:bg-gray-200 transition text-sm">Non, garder</button>
             <button id="btnConfirmCancel" class="flex-1 h-11 bg-red-500 text-white rounded-xl font-bold hover:-translate-y-0.5 transition shadow-lg shadow-red-500/30 text-sm">Oui, annuler</button>
         </div>
+    </div>
+</div>
+
+<!-- MODAL MESSAGE AU CUISINIER -->
+<div id="modalMsgCook" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-[2rem] w-full max-w-sm shadow-2xl p-6 relative">
+        <button onclick="closeMsgCook()" class="absolute top-4 right-4 w-8 h-8 bg-gray-100 text-textMuted rounded-full flex items-center justify-center hover:bg-gray-200 transition"><i class="fa-solid fa-xmark text-sm"></i></button>
+        <div class="w-12 h-12 bg-brandLight text-brand rounded-2xl flex items-center justify-center mb-4"><i class="fa-solid fa-comment-kitchen text-xl"></i></div>
+        <h3 class="font-extrabold text-xl mb-1">Contacter la Cuisine</h3>
+        <p class="text-xs text-textMuted mb-6">Envoyez un message ou une instruction spéciale à l'équipe de cuisine. Ils le verront dans leurs notifications.</p>
+        <form onsubmit="sendMsgToCook(event)" class="space-y-4">
+            <div>
+                <label class="text-xs font-bold text-textMuted block mb-1.5">Votre message <span class="text-brand">*</span></label>
+                <textarea id="msgCookInput" required rows="4" class="w-full bg-surface border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-bold focus:outline-none focus:border-brand transition resize-none" placeholder="Ex: Pouvez-vous réduire le sel dans les plats ? Allergie à la cacahuète..."></textarea>
+            </div>
+            <div class="flex space-x-3">
+                <button type="button" onclick="closeMsgCook()" class="flex-1 h-11 bg-gray-100 text-textMuted rounded-xl font-bold hover:bg-gray-200 transition text-sm">Annuler</button>
+                <button type="submit" id="btnSendMsgCook" class="flex-1 h-11 bg-brand text-white rounded-xl font-bold hover:-translate-y-0.5 transition shadow-lg shadow-brand/20 text-sm flex items-center justify-center"><i class="fa-solid fa-paper-plane mr-2"></i>Envoyer</button>
+            </div>
+        </form>
     </div>
 </div>
 

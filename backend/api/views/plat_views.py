@@ -96,7 +96,7 @@ class PlatDetailView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
             
-        serializer = PlatSerializer(plat, data=request.data)
+        serializer = PlatSerializer(plat, data=request.data, partial=True)
         if not serializer.is_valid():
             return Response(
                 {'message': 'Erreur de validation.', 'errors': serializer.errors},

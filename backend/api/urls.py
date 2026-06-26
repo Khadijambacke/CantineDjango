@@ -6,7 +6,7 @@ from .views.plat_views import PlatListCreateView, PlatDetailView
 from .views.menu_views import MenuListCreateView, MenuStatsView, MenuDetailView
 from .views.reservation_views import ReservationListCreateView, ReservationDetailView
 from .views.cuisinier_views import CuisinierMenusView, CuisinierReservationsView, CuisinierUpdateStatusView
-from .views.notification_views import NotificationListView, NotificationMarkReadView, BroadcastNotificationView
+from .views.notification_views import NotificationListView, NotificationMarkReadView, BroadcastNotificationView, MessageCuisinierView
 
 urlpatterns = [
     # Routes d'Authentification
@@ -39,6 +39,7 @@ urlpatterns = [
     path('notifications/', NotificationListView.as_view(), name='notifications-list'),
     path('notifications/<int:pk>/read/', NotificationMarkReadView.as_view(), name='notification-read'),
     path('notifications/broadcast/', BroadcastNotificationView.as_view(), name='notification-broadcast'),
+    path('notifications/message-cuisinier/', MessageCuisinierView.as_view(), name='message-cuisinier'),
     
     # Solde
     path('solde/recharger/', RechargerSoldeView.as_view(), name='recharger-solde'),

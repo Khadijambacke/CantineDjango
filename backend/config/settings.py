@@ -180,3 +180,7 @@ APPEND_SLASH = True
 # Configuration CORS : autoriser le frontend a appeler le backend
 CORS_ALLOW_ALL_ORIGINS = True  # En developpement uniquement
 CORS_ALLOW_CREDENTIALS = True
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
