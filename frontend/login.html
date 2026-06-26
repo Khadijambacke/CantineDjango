@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CantinEntreprise - Connexion</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: '#FF5A00',
+                        brandLight: '#FFF0E6',
+                        surface: '#FDFDFD',
+                        card: '#FFFFFF',
+                        textDark: '#1A1A1A',
+                        textMuted: '#7A7A7A'
+                    },
+                    borderRadius: { '4xl': '2rem', '5xl': '2.5rem' }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-surface text-textDark antialiased min-h-screen flex flex-col md:flex-row">
+
+    <!-- Panneau gauche (image d'ambiance, visible uniquement desktop) -->
+    <div class="hidden md:flex md:w-1/2 bg-brand relative items-center justify-center overflow-hidden">
+        <div class="absolute -top-20 -left-20 w-72 h-72 bg-white/10 blob-shape"></div>
+        <div class="absolute -bottom-20 -right-20 w-64 h-64 bg-white/10 blob-shape" style="animation-delay:-3s;"></div>
+        <div class="relative z-10 text-center text-white px-12">
+            <div class="w-56 h-56 mx-auto mb-8 relative">
+                <div class="absolute inset-0 bg-white/20 rounded-full blob-shape scale-110"></div>
+                <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" 
+                     alt="Plat" class="w-full h-full object-cover rounded-full border-4 border-white/30 animate-float relative z-10">
+            </div>
+            <h2 class="text-3xl font-extrabold mb-3">CantinEntreprise</h2>
+            <p class="text-white/70 text-sm font-medium">Reservez votre repas de demain en quelques clics.</p>
+        </div>
+    </div>
+
+    <!-- Panneau droit (formulaire) -->
+    <div class="flex-1 flex flex-col justify-center px-8 py-12 md:px-16 lg:px-24 max-w-xl mx-auto w-full">
+        
+        <!-- Logo mobile -->
+        <div class="md:hidden flex items-center space-x-2 mb-10">
+            <div class="w-9 h-9 bg-brand text-white rounded-full flex items-center justify-center">
+                <i class="fa-solid fa-utensils text-sm"></i>
+            </div>
+            <span class="font-extrabold text-lg text-textDark">CantinEntreprise</span>
+        </div>
+
+        <h1 class="text-3xl font-extrabold tracking-tight mb-1">Connexion</h1>
+        <p class="text-textMuted text-sm font-medium mb-8">Entrez vos identifiants pour acceder a votre espace.</p>
+
+        <form id="loginForm" class="space-y-5">
+            <!-- Email -->
+            <div>
+                <label class="text-xs font-bold text-textMuted uppercase tracking-wider mb-1.5 block">E-mail professionnel</label>
+                <div class="flex items-center h-12 rounded-xl bg-white border border-gray-200 px-4 focus-within:border-brand focus-within:ring-2 focus-within:ring-brandLight transition-all">
+                    <i class="fa-regular fa-envelope text-textMuted text-sm"></i>
+                    <input type="email" id="email" required placeholder="nom@entreprise.com" class="flex-1 bg-transparent border-none px-3 text-sm font-medium text-textDark placeholder-gray-300 outline-none">
+                </div>
+            </div>
+
+            <!-- Password -->
+            <div>
+                <label class="text-xs font-bold text-textMuted uppercase tracking-wider mb-1.5 block">Mot de passe</label>
+                <div class="flex items-center h-12 rounded-xl bg-white border border-gray-200 px-4 focus-within:border-brand focus-within:ring-2 focus-within:ring-brandLight transition-all">
+                    <i class="fa-solid fa-lock text-textMuted text-sm"></i>
+                    <input type="password" id="password" required placeholder="Votre mot de passe" class="flex-1 bg-transparent border-none px-3 text-sm font-medium text-textDark placeholder-gray-300 outline-none">
+                    <button type="button" id="togglePassword" class="text-textMuted hover:text-textDark"><i class="fa-regular fa-eye-slash text-xs"></i></button>
+                </div>
+            </div>
+
+            <!-- Submit -->
+            <button type="submit" id="loginBtn" class="w-full h-13 bg-brand text-white rounded-xl font-bold text-base shadow-soft mt-4 transform transition hover:-translate-y-0.5 active:scale-[0.98] flex items-center justify-center py-3.5">
+                Se connecter <i class="fa-solid fa-arrow-right ml-2 text-sm"></i>
+            </button>
+        </form>
+
+        <!-- Message d'erreur -->
+        <div id="loginError" class="hidden mt-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm font-medium"></div>
+        
+        <!-- Message OTP non verifie -->
+        <div id="otpNeeded" class="hidden mt-4 p-4 bg-brandLight border border-brand/20 rounded-xl text-sm">
+            <p class="font-bold text-textDark mb-2">Compte non verifie</p>
+            <p class="text-textMuted text-xs mb-3">Veuillez entrer le code OTP envoye a votre e-mail.</p>
+            <div class="flex space-x-2">
+                <input type="text" id="otpCodeLogin" maxlength="6" placeholder="Code OTP" class="flex-1 h-10 rounded-lg border border-gray-200 px-3 text-sm text-center font-bold tracking-[0.3em] outline-none focus:border-brand">
+                <button id="verifyOtpBtn" class="h-10 px-4 bg-brand text-white rounded-lg font-bold text-sm">Valider</button>
+            </div>
+            <button id="resendOtpLogin" class="mt-2 text-brand text-xs font-bold hover:underline">Renvoyer le code</button>
+        </div>
+
+        <p class="mt-8 text-center text-sm text-textMuted">Pas encore de compte ? <a href="register.html" class="text-brand font-bold hover:underline">Creer un compte</a></p>
+    </div>
+
+    <script src="assets/js/app.js"></script>
+    <script>
+        // Toggle password visibility
+        document.getElementById('togglePassword').addEventListener('click', () => {
+            const input = document.getElementById('password');
+            const icon = document.querySelector('#togglePassword i');
+            if (input.type === 'password') { input.type = 'text'; icon.className = 'fa-regular fa-eye text-xs'; }
+            else { input.type = 'password'; icon.className = 'fa-regular fa-eye-slash text-xs'; }
+        });
+
+        let pendingEmail = ''; // Pour stocker l'email en cas de besoin d'OTP
+
+        // Formulaire de connexion -> POST /api/login/
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('loginBtn');
+            const errorDiv = document.getElementById('loginError');
+            const otpDiv = document.getElementById('otpNeeded');
+            errorDiv.classList.add('hidden');
+            otpDiv.classList.add('hidden');
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            pendingEmail = email;
+
+            setLoading(btn, true);
+            try {
+                // APPEL API : POST /api/login/
+                const res = await fetchAPI('/login/', 'POST', { email, password });
+                
+                // Stocker le JWT et les infos user
+                localStorage.setItem('token', res.jwt);
+                localStorage.setItem('user', JSON.stringify(res.user));
+                
+                // Rediriger vers le bon dashboard selon le role
+                redirectUserByRole(res.user.role);
+            } catch (err) {
+                setLoading(btn, false);
+                // Si le backend renvoie not_verified, on affiche le champ OTP
+                if (err.body && err.body.not_verified) {
+                    otpDiv.classList.remove('hidden');
+                } else {
+                    errorDiv.textContent = err.message;
+                    errorDiv.classList.remove('hidden');
+                }
+            }
+        });
+
+        // Verification OTP depuis la page login -> POST /api/verify-otp/
+        document.getElementById('verifyOtpBtn').addEventListener('click', async () => {
+            const code = document.getElementById('otpCodeLogin').value;
+            if (!code || code.length < 6) { showToast('Entrez le code a 6 chiffres.', 'error'); return; }
+            try {
+                await fetchAPI('/verify-otp/', 'POST', { email: pendingEmail, otp_code: code });
+                showToast('Compte verifie ! Reconnectez-vous.', 'success');
+                document.getElementById('otpNeeded').classList.add('hidden');
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        });
+
+        // Renvoyer OTP -> POST /api/resend-otp/
+        document.getElementById('resendOtpLogin').addEventListener('click', async () => {
+            try {
+                await fetchAPI('/resend-otp/', 'POST', { email: pendingEmail });
+                showToast('Nouveau code envoye par e-mail.', 'info');
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        });
+    </script>
+</body>
+</html>

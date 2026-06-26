@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CantinEntreprise - Mon Espace</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script>tailwind.config={theme:{extend:{colors:{brand:'#FF5A00',brandLight:'#FFF0E6',surface:'#FDFDFD',textDark:'#1A1A1A',textMuted:'#7A7A7A',success:'#10B981'}}}}</script>
+<style>.no-scrollbar::-webkit-scrollbar{display:none;}.no-scrollbar{-ms-overflow-style:none;scrollbar-width:none;}@keyframes blob{0%,100%{border-radius:60% 40% 30% 70%/60% 30% 70% 40%}50%{border-radius:30% 60% 70% 40%/50% 60% 30% 60%}}.blob-a{animation:blob 8s infinite ease-in-out;}</style>
+</head>
+<body class="bg-surface text-textDark antialiased flex h-screen overflow-hidden">
+
+<!-- SIDEBAR -->
+<aside class="w-64 hidden lg:flex flex-col bg-white border-r border-gray-100 p-6 flex-shrink-0">
+    <div class="flex items-center space-x-3 mb-10 pl-2">
+        <div class="w-10 h-10 bg-brand text-white rounded-xl flex items-center justify-center font-bold"><i class="fa-solid fa-utensils"></i></div>
+        <span class="font-extrabold text-lg tracking-tight">CantinEntreprise</span>
+    </div>
+    <nav class="flex-1 space-y-1">
+        <p class="text-[10px] font-bold text-textMuted uppercase tracking-widest pl-3 mb-3">Mon Espace</p>
+        <button id="nav-dashboard" onclick="showTab('dashboard')" class="w-full flex items-center px-4 py-3 bg-brandLight text-brand rounded-2xl font-bold transition text-sm">
+            <i class="fa-solid fa-house w-6"></i>Tableau de Bord
+        </button>
+        <button id="nav-commander" onclick="showTab('commander')" class="w-full flex items-center px-4 py-3 text-textMuted hover:bg-gray-50 rounded-2xl font-bold transition text-sm">
+            <i class="fa-solid fa-bowl-food w-6"></i>Commander
+        </button>
+        <button id="nav-historique" onclick="showTab('historique')" class="w-full flex items-center px-4 py-3 text-textMuted hover:bg-gray-50 rounded-2xl font-bold transition text-sm">
+            <i class="fa-solid fa-clock-rotate-left w-6"></i>Historique
+        </button>
+        <button id="nav-notifications" onclick="showTab('notifications')" class="w-full flex items-center px-4 py-3 text-textMuted hover:bg-gray-50 rounded-2xl font-bold transition text-sm">
+            <i class="fa-solid fa-bell w-6"></i>Notifications
+            <span id="notifBadge" class="hidden ml-auto w-5 h-5 bg-brand text-white text-[10px] font-bold rounded-full flex items-center justify-center">0</span>
+        </button>
+    </nav>
+    <!-- Solde sidebar -->
+    <div class="bg-brandLight rounded-2xl p-4 mb-3 relative group">
+        <p class="text-[10px] font-bold text-brand uppercase tracking-wider mb-1">Mon Solde</p>
+        <p id="sidebarSolde" class="font-extrabold text-textDark">- CFA</p>
+        <button onclick="openRecharge()" class="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 bg-brand text-white rounded-xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition shadow hover:bg-orange-600" title="Recharger mon compte">
+            <i class="fa-solid fa-plus text-xs"></i>
+        </button>
+    </div>
+    <div class="bg-surface p-3 rounded-2xl border border-gray-100 flex items-center justify-between cursor-pointer hover:border-gray-200 transition" onclick="logout()">
+        <div class="flex items-center">
+            <div class="w-9 h-9 rounded-full bg-brandLight text-brand flex items-center justify-center font-bold text-sm u-avatar">E</div>
+            <div class="ml-3"><p class="text-xs font-bold u-name truncate max-w-[90px]">Employé</p><p class="text-[10px] text-textMuted">Déconnexion</p></div>
+        </div>
+        <i class="fa-solid fa-right-from-bracket text-textMuted text-xs"></i>
+    </div>
+</aside>
+
+<!-- MAIN -->
+<main class="flex-1 flex flex-col h-full overflow-hidden">
+    <!-- Header -->
+    <header class="px-6 py-4 bg-white border-b border-gray-100 flex items-center justify-between flex-shrink-0 z-20">
+        <div class="flex items-center space-x-3">
+            <div class="w-9 h-9 rounded-full bg-brandLight text-brand flex items-center justify-center font-bold lg:hidden u-avatar">E</div>
+            <p class="font-extrabold text-base">Bonjour, <span id="greetName">!</span></p>
+        </div>
+        <div class="flex items-center space-x-2">
+            <!-- mobile nav pills -->
+            <div class="flex space-x-1 lg:hidden text-[10px] font-bold">
+                <button onclick="showTab('dashboard')" class="px-2 py-1 bg-brandLight text-brand rounded-full">Accueil</button>
+                <button onclick="showTab('commander')" class="px-2 py-1 text-textMuted">Menu</button>
+                <button onclick="showTab('historique')" class="px-2 py-1 text-textMuted">Hist.</button>
+                <button onclick="showTab('notifications')" class="px-2 py-1 text-textMuted">Notifs</button>
+            </div>
+            <!-- Panier -->
+            <button onclick="openPayment()" class="relative w-10 h-10 rounded-full bg-brand text-white flex items-center justify-center hover:bg-orange-600 transition">
+                <i class="fa-solid fa-basket-shopping text-sm"></i>
+                <span id="cartBadge" class="hidden absolute -top-1 -right-1 w-4 h-4 bg-white text-brand text-[10px] font-extrabold rounded-full border border-brand flex items-center justify-center">0</span>
+            </button>
+        </div>
+    </header>
+
+    <div class="flex-1 overflow-y-auto no-scrollbar">
+        <!-- ═══ TAB: DASHBOARD ═══ -->
+        <div id="tab-dashboard" class="p-6 lg:p-8 space-y-6 max-w-6xl mx-auto">
+            <!-- Banner hero -->
+            <div class="relative bg-brand text-white rounded-[2rem] p-8 overflow-hidden">
+                <div class="absolute -top-12 -right-12 w-48 h-48 bg-white/10 blob-a"></div>
+                <div class="absolute -bottom-12 right-20 w-36 h-36 bg-white/10 blob-a" style="animation-delay:-4s"></div>
+                <span class="inline-flex items-center px-3 py-1 bg-white/20 rounded-full text-xs font-bold mb-3 backdrop-blur-sm"><i class="fa-solid fa-star mr-1.5"></i>Bienvenue</span>
+                <h1 class="text-2xl lg:text-3xl font-extrabold leading-tight">Mangez bien,<br>Travaillez mieux.</h1>
+                <p class="text-white/70 text-sm mt-2">La cantine d'entreprise nouvelle génération.</p>
+                <button onclick="showTab('commander')" class="mt-5 inline-flex items-center px-6 py-3 bg-white text-brand rounded-2xl font-extrabold hover:-translate-y-0.5 transition shadow-lg">
+                    <i class="fa-solid fa-bowl-food mr-2"></i>Voir le menu du jour
+                </button>
+            </div>
+
+            <!-- KPI Cards -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white rounded-3xl border border-gray-100 p-5 shadow-sm relative group">
+                    <div class="w-10 h-10 bg-brandLight rounded-xl flex items-center justify-center mb-3"><i class="fa-solid fa-wallet text-brand"></i></div>
+                    <p class="text-[10px] font-bold text-textMuted uppercase tracking-wider">Mon Solde</p>
+                    <p class="text-xl font-extrabold mt-1"><span id="kpiSolde">-</span> <span class="text-xs text-brand">CFA</span></p>
+                    <button onclick="openRecharge()" class="absolute top-5 right-5 w-8 h-8 bg-brandLight text-brand rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition hover:bg-brand hover:text-white" title="Recharger mon solde">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                </div>
+                <div class="bg-white rounded-3xl border border-gray-100 p-5 shadow-sm">
+                    <div class="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center mb-3"><i class="fa-solid fa-receipt text-brand"></i></div>
+                    <p class="text-[10px] font-bold text-textMuted uppercase tracking-wider">Dépenses du mois</p>
+                    <p class="text-xl font-extrabold mt-1"><span id="kpiDepenses">-</span> <span class="text-xs text-textMuted">CFA</span></p>
+                </div>
+                <div class="bg-white rounded-3xl border border-gray-100 p-5 shadow-sm">
+                    <div class="w-10 h-10 bg-green-50 rounded-xl flex items-center justify-center mb-3"><i class="fa-solid fa-check-circle text-success"></i></div>
+                    <p class="text-[10px] font-bold text-textMuted uppercase tracking-wider">Réservations</p>
+                    <p class="text-xl font-extrabold mt-1"><span id="kpiReservations">-</span> <span class="text-xs text-textMuted">ce mois</span></p>
+                </div>
+                <div class="bg-white rounded-3xl border border-gray-100 p-5 shadow-sm">
+                    <div class="w-10 h-10 bg-red-50 rounded-xl flex items-center justify-center mb-3"><i class="fa-solid fa-bell text-red-400"></i></div>
+                    <p class="text-[10px] font-bold text-textMuted uppercase tracking-wider">Notifications</p>
+                    <p class="text-xl font-extrabold mt-1"><span id="kpiNotifs">-</span> <span class="text-xs text-textMuted">non lues</span></p>
+                </div>
+            </div>
+
+            <!-- Résumé menu du jour + récentes réservations -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-extrabold">Menu d'Aujourd'hui</h3>
+                        <span class="text-xs font-bold text-brand bg-brandLight px-2 py-1 rounded-full"><span id="kpiMenus">-</span> plats</span>
+                    </div>
+                    <p class="text-xs text-textMuted mb-4">Cliquez sur "Commander" pour voir tous les plats disponibles.</p>
+                    <button onclick="showTab('commander')" class="w-full h-11 bg-brand text-white rounded-2xl font-bold text-sm hover:-translate-y-0.5 transition flex items-center justify-center">
+                        <i class="fa-solid fa-arrow-right mr-2"></i>Accéder au menu
+                    </button>
+                </div>
+                <div class="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-extrabold">Réservations Récentes</h3>
+                        <button onclick="showTab('historique')" class="text-xs text-brand font-bold hover:underline">Voir tout</button>
+                    </div>
+                    <div id="recentRes"><p class="text-xs text-textMuted text-center py-4">Chargement...</p></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ TAB: COMMANDER ═══ -->
+        <div id="tab-commander" class="hidden p-6 lg:p-8 max-w-6xl mx-auto">
+            <div class="relative bg-brand text-white rounded-[2rem] p-8 mb-8 overflow-hidden">
+                <div class="absolute -top-10 -right-10 w-40 h-40 bg-white/10 blob-a"></div>
+                <h2 class="text-2xl font-extrabold relative z-10">Menu du Jour</h2>
+                <p class="text-white/70 text-sm mt-1 relative z-10">Sélectionnez vos plats, desserts et boissons.</p>
+            </div>
+            <div id="menuLoading" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                <div class="h-56 bg-white rounded-3xl border animate-pulse"></div>
+                <div class="h-56 bg-white rounded-3xl border animate-pulse"></div>
+                <div class="h-56 bg-white rounded-3xl border animate-pulse"></div>
+            </div>
+            <div id="menuGrid" class="hidden grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+
+            <!-- Mini panier mobile -->
+            <div class="mt-8 bg-white rounded-3xl border border-gray-100 p-6 shadow-sm">
+                <h3 class="font-extrabold mb-4">Votre Sélection</h3>
+                <div id="cartEmpty" class="text-center py-6 text-textMuted"><i class="fa-solid fa-basket-shopping text-3xl opacity-20 block mb-2"></i><p class="text-sm font-bold">Panier vide</p></div>
+                <div id="cartFull" class="hidden">
+                    <div id="cartItems" class="space-y-0 mb-4"></div>
+                    <div class="flex justify-between items-center pt-4 border-t border-gray-100 mb-4">
+                        <span class="font-bold text-textMuted">Total</span>
+                        <span id="cartTotal" class="font-extrabold text-xl">0 CFA</span>
+                    </div>
+                    <button onclick="openPayment()" class="w-full h-12 bg-brand text-white rounded-2xl font-bold hover:-translate-y-0.5 transition flex items-center justify-center">
+                        Commander <i class="fa-solid fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ TAB: HISTORIQUE ═══ -->
+        <div id="tab-historique" class="hidden p-6 lg:p-8 max-w-4xl mx-auto">
+            <h2 class="text-xl font-extrabold mb-6">Mes Réservations</h2>
+            <div class="bg-white rounded-3xl border border-gray-100 shadow-sm p-2">
+                <div id="histList"><div class="p-6 text-center text-textMuted text-sm">Chargement...</div></div>
+            </div>
+        </div>
+
+        <!-- ═══ TAB: NOTIFICATIONS ═══ -->
+        <div id="tab-notifications" class="hidden p-6 lg:p-8 max-w-3xl mx-auto">
+            <h2 class="text-xl font-extrabold mb-6">Mes Notifications</h2>
+            <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+                <div id="notifList"><div class="p-6 text-center text-textMuted text-sm">Chargement...</div></div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- MODAL COMMANDE -->
+<div id="modalOrder" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-4">
+    <div class="bg-white rounded-t-[2rem] sm:rounded-[2rem] w-full max-w-md shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+        <div class="bg-brand text-white p-6 relative flex-shrink-0">
+            <div class="absolute -right-6 -top-6 w-20 h-20 bg-white/20 rounded-full blur-xl"></div>
+            <button onclick="closePayment()" class="absolute top-4 right-4 w-8 h-8 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition"><i class="fa-solid fa-xmark text-sm"></i></button>
+            <p class="text-xs font-bold opacity-80 uppercase mb-1" id="stepIndicator">Étape 1/2</p>
+            <p class="text-2xl font-extrabold">Finaliser la commande</p>
+        </div>
+        
+        <div class="overflow-y-auto p-6 space-y-6">
+            <!-- ETAPE 1: MODE DE SERVICE -->
+            <div id="step1" class="space-y-4">
+                <p class="text-sm font-bold text-textDark">Comment souhaitez-vous consommer ?</p>
+                <div class="grid grid-cols-3 gap-3">
+                    <button id="svc-sur_place" onclick="selectService('sur_place')" class="service-btn border-2 border-brand bg-brandLight/50 rounded-2xl p-3 flex flex-col items-center justify-center gap-2 transition text-brand">
+                        <i class="fa-solid fa-chair text-xl"></i>
+                        <span class="text-[10px] font-bold">Sur place</span>
+                    </button>
+                    <button id="svc-emporter" onclick="selectService('emporter')" class="service-btn border-2 border-gray-200 rounded-2xl p-3 flex flex-col items-center justify-center gap-2 transition text-textMuted hover:border-gray-300">
+                        <i class="fa-solid fa-bag-shopping text-xl"></i>
+                        <span class="text-[10px] font-bold">À emporter</span>
+                    </button>
+                    <button id="svc-livraison" onclick="selectService('livraison')" class="service-btn border-2 border-gray-200 rounded-2xl p-3 flex flex-col items-center justify-center gap-2 transition text-textMuted hover:border-gray-300">
+                        <i class="fa-solid fa-motorcycle text-xl"></i>
+                        <span class="text-[10px] font-bold">Livraison</span>
+                    </button>
+                </div>
+                
+                <div id="lieuRow" class="hidden mt-4 space-y-2 animate-fade-in">
+                    <label class="text-xs font-bold text-textMuted">Lieu de livraison <span class="text-brand">*</span></label>
+                    <div class="relative">
+                        <i class="fa-solid fa-location-dot absolute left-4 top-1/2 -translate-y-1/2 text-textMuted"></i>
+                        <input type="text" id="lieuInput" placeholder="Ex: Bureau 402, Bâtiment A..." class="w-full bg-surface border border-gray-200 rounded-xl pl-10 pr-4 py-3 text-sm font-bold focus:outline-none focus:border-brand transition">
+                    </div>
+                    <p class="text-[10px] text-brand font-bold"><i class="fa-solid fa-circle-info mr-1"></i>Frais de livraison : 500 CFA</p>
+                </div>
+
+                <!-- Options de personnalisation -->
+                <div class="mt-4 space-y-2">
+                    <label class="text-xs font-bold text-textMuted">Options de personnalisation</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-pen absolute left-4 top-4 text-textMuted"></i>
+                        <textarea id="optionsInput" rows="2" placeholder="Ex: Avec piment, sans mayonnaise, ketchup..." class="w-full bg-surface border border-gray-200 rounded-xl pl-10 pr-4 py-3 text-sm font-bold focus:outline-none focus:border-brand transition resize-none"></textarea>
+                    </div>
+                </div>
+
+                <div class="bg-surface rounded-2xl p-4 mt-6 border border-gray-100" id="summaryTotal">
+                    <!-- Rempli par JS -->
+                </div>
+
+                <button onclick="goToStep2()" class="w-full h-12 mt-4 bg-brand text-white rounded-2xl font-bold hover:-translate-y-0.5 transition flex items-center justify-center shadow-lg shadow-brand/30">
+                    Continuer vers le paiement <i class="fa-solid fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+
+            <!-- ETAPE 2: PAIEMENT -->
+            <div id="step2" class="hidden space-y-4">
+                <button onclick="showStep(1)" class="text-xs font-bold text-textMuted hover:text-textDark mb-2 inline-flex items-center"><i class="fa-solid fa-arrow-left mr-1"></i>Retour</button>
+                
+                <div class="bg-surface rounded-2xl p-4 border border-gray-100 mb-6 flex justify-between items-center">
+                    <span class="text-sm font-bold text-textMuted">Total à payer</span>
+                    <span class="text-2xl font-extrabold text-brand" id="payTotal2">0 CFA</span>
+                </div>
+
+                <p class="text-sm font-bold text-textDark mb-3">Choisissez votre mode de paiement</p>
+                
+                <!-- Solde perso -->
+                <button id="btnPaySolde" onclick="confirmOrder('solde')" class="w-full p-4 flex items-center bg-white border-2 border-gray-200 hover:border-brand rounded-2xl transition group relative overflow-hidden text-left mb-3">
+                    <div class="w-10 h-10 bg-brandLight text-brand rounded-full flex items-center justify-center mr-4 group-hover:bg-brand group-hover:text-white transition flex-shrink-0"><i class="fa-solid fa-wallet"></i></div>
+                    <div class="flex-1 min-w-0">
+                        <p class="font-extrabold text-sm text-textDark group-hover:text-brand transition">Solde Cantine</p>
+                        <p class="text-xs text-textMuted truncate">Disponible : <span id="soldeDispo2" class="font-bold text-textDark">- CFA</span></p>
+                    </div>
+                </button>
+                <p id="soldeInsuffMsg" class="hidden text-xs font-bold text-red-500 text-center mb-4"><i class="fa-solid fa-circle-exclamation mr-1"></i>Solde insuffisant pour cette commande.</p>
+
+                <!-- Compte entreprise -->
+                <button id="btnPayFacture" onclick="confirmOrder('facture')" class="w-full p-4 flex items-center bg-white border-2 border-gray-200 hover:border-blue-500 rounded-2xl transition group text-left">
+                    <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mr-4 group-hover:bg-blue-600 group-hover:text-white transition flex-shrink-0"><i class="fa-solid fa-building-columns"></i></div>
+                    <div class="flex-1 min-w-0">
+                        <p class="font-extrabold text-sm text-textDark group-hover:text-blue-600 transition">Compte Entreprise</p>
+                        <p class="text-xs text-textMuted truncate">Prélevé sur salaire en fin de mois.</p>
+                    </div>
+                </button>
+            </div>
+        </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL RECHARGE -->
+<div id="modalRecharge" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-[2rem] w-full max-w-sm shadow-2xl p-6 relative">
+        <button onclick="closeRecharge()" class="absolute top-4 right-4 w-8 h-8 bg-gray-100 text-textMuted rounded-full flex items-center justify-center hover:bg-gray-200 transition"><i class="fa-solid fa-xmark text-sm"></i></button>
+        <div class="w-12 h-12 bg-brandLight text-brand rounded-2xl flex items-center justify-center mb-4"><i class="fa-solid fa-bolt text-xl"></i></div>
+        <h3 class="font-extrabold text-xl mb-1">Recharger mon compte</h3>
+        <p class="text-xs text-textMuted mb-6">Ajoutez du solde pour payer vos repas plus facilement.</p>
+        
+        <form onsubmit="submitRecharge(event)">
+            <label class="text-xs font-bold text-textMuted block mb-2">Montant (CFA)</label>
+            <div class="relative mb-4">
+                <input type="number" id="rechargeInput" required min="100" step="100" class="w-full bg-surface border-2 border-gray-200 rounded-2xl px-4 py-3 font-extrabold text-lg focus:outline-none focus:border-brand transition" placeholder="Ex: 5000">
+                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-textMuted font-bold text-sm">CFA</span>
+            </div>
+            <p id="rechargeError" class="hidden text-xs font-bold text-red-500 mb-4"></p>
+            <button type="submit" id="rechargeBtn" class="w-full h-12 bg-brand text-white rounded-2xl font-bold hover:-translate-y-0.5 transition shadow-lg shadow-brand/30">
+                <i class="fa-solid fa-bolt mr-2"></i>Recharger maintenant
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL ANNULER -->
+<div id="modalCancel" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-[2rem] w-full max-w-sm shadow-2xl p-6 relative text-center">
+        <div class="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4"><i class="fa-solid fa-triangle-exclamation text-2xl"></i></div>
+        <h3 class="font-extrabold text-xl mb-2">Annuler la commande ?</h3>
+        <p class="text-sm text-textMuted mb-6">Êtes-vous sûr de vouloir annuler cette commande ? L'action est irréversible et le montant sera recrédité sur votre solde.</p>
+        <div class="flex space-x-3">
+            <button onclick="closeCancel()" class="flex-1 h-11 bg-gray-100 text-textMuted rounded-xl font-bold hover:bg-gray-200 transition text-sm">Non, garder</button>
+            <button id="btnConfirmCancel" class="flex-1 h-11 bg-red-500 text-white rounded-xl font-bold hover:-translate-y-0.5 transition shadow-lg shadow-red-500/30 text-sm">Oui, annuler</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL DÉTAILS REPAS -->
+<div id="modalMealDetails" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-4">
+    <div class="bg-white rounded-t-[2rem] sm:rounded-[2rem] w-full max-w-md shadow-2xl overflow-hidden flex flex-col">
+        <div class="relative h-64 flex-shrink-0">
+            <img id="mealImage" src="" class="w-full h-full object-cover" alt="Plat">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+            <button onclick="closeMealDetails()" class="absolute top-4 right-4 w-8 h-8 bg-black/30 backdrop-blur text-white rounded-full flex items-center justify-center hover:bg-black/50 transition"><i class="fa-solid fa-xmark text-sm"></i></button>
+            <span id="mealType" class="absolute top-4 left-4 bg-white/90 backdrop-blur text-brand text-[10px] font-bold px-3 py-1.5 rounded-full shadow-sm">Plat</span>
+            <div class="absolute bottom-6 left-6 right-6">
+                <h2 id="mealTitle" class="text-2xl font-extrabold text-white mb-1">Nom du plat</h2>
+                <p id="mealPrice" class="text-brandLight font-extrabold text-lg">0 CFA</p>
+            </div>
+        </div>
+        <div class="p-6">
+            <p class="text-sm font-bold text-textDark mb-2">Description</p>
+            <p id="mealDesc" class="text-sm text-textMuted mb-6 leading-relaxed">Description complète du plat...</p>
+            
+            <button id="btnMealAddToCart" class="w-full h-12 bg-brand text-white rounded-2xl font-bold hover:-translate-y-0.5 transition shadow-lg shadow-brand/30 flex items-center justify-center">
+                <i class="fa-solid fa-cart-plus mr-2"></i>Ajouter au panier
+            </button>
+        </div>
+    </div>
+</div>
+
+<script src="assets/js/employe.js"></script>
+</body>
+</html>

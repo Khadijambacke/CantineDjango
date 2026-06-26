@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CantinEntreprise - Dashboard Cuisinier</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: '#FF5A00',
+                        brandLight: '#FFF0E6',
+                        surface: '#FDFDFD',
+                        card: '#FFFFFF',
+                        textDark: '#1A1A1A',
+                        textMuted: '#7A7A7A',
+                        success: '#10B981',
+                        warning: '#F59E0B'
+                    },
+                    borderRadius: { '4xl': '2rem', '5xl': '2.5rem' },
+                    boxShadow: { 'soft': '0 10px 40px -10px rgba(0,0,0,0.08)' }
+                }
+            }
+        }
+    </script>
+    <style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-surface text-textDark antialiased flex h-screen overflow-hidden">
+    <script src="assets/js/app.js"></script>
+    <script>checkAuthGuard();</script>
+
+    <!-- Sidebar -->
+    <aside class="w-64 hidden lg:flex flex-col bg-white border-r border-gray-100 p-6 flex-shrink-0 z-20">
+        <div class="flex items-center space-x-3 mb-10 pl-2">
+            <div class="w-10 h-10 bg-brand text-white rounded-xl flex items-center justify-center font-bold shadow-soft">
+                <i class="fa-solid fa-utensils"></i>
+            </div>
+            <span class="font-extrabold text-lg tracking-tight">CantinEntreprise</span>
+        </div>
+
+        <nav class="flex-1 space-y-2">
+            <p class="text-[10px] font-bold text-textMuted uppercase tracking-widest pl-2 mb-3">Menu Cuisinier</p>
+            <a href="#" class="flex items-center px-4 py-3 bg-brandLight text-brand rounded-2xl font-bold transition">
+                <i class="fa-solid fa-fire-burner w-6"></i>
+                <span class="text-sm">Préparations</span>
+            </a>
+            <a href="#" class="flex items-center px-4 py-3 text-textMuted hover:bg-gray-50 hover:text-textDark rounded-2xl font-bold transition">
+                <i class="fa-solid fa-book-open w-6"></i>
+                <span class="text-sm">Gérer les Menus</span>
+            </a>
+        </nav>
+
+        <div class="mt-auto bg-surface p-4 rounded-2xl border border-gray-50 flex items-center justify-between cursor-pointer hover:border-gray-200 transition" onclick="logout()">
+            <div class="flex items-center">
+                <div class="w-10 h-10 rounded-full bg-brandLight text-brand flex items-center justify-center font-bold text-sm" id="desktopAvatar">C</div>
+                <div class="ml-3">
+                    <h3 class="text-xs font-bold text-textDark line-clamp-1" id="desktopUserName">Chef</h3>
+                    <p class="text-[10px] text-textMuted">Déconnexion</p>
+                </div>
+            </div>
+            <i class="fa-solid fa-right-from-bracket text-textMuted text-xs"></i>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-full overflow-y-auto no-scrollbar relative z-10 pb-24 lg:pb-0">
+        <header class="lg:hidden px-6 pt-6 pb-2 flex items-center justify-between bg-surface sticky top-0 z-30">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-full bg-brandLight text-brand flex items-center justify-center font-bold" id="mobileAvatar">C</div>
+                <div>
+                    <p class="text-[10px] text-textMuted uppercase tracking-wider">Espace Cuisine</p>
+                    <h1 class="text-sm font-bold leading-tight" id="mobileUserName">Chef</h1>
+                </div>
+            </div>
+            <button onclick="logout()" class="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-textMuted border border-gray-100">
+                <i class="fa-solid fa-power-off text-sm"></i>
+            </button>
+        </header>
+
+        <div class="p-6 lg:p-8 xl:p-10 space-y-8 max-w-6xl mx-auto w-full">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-extrabold" id="desktopGreeting">Tableau de Bord Cuisine</h1>
+                    <p class="text-sm text-textMuted">Vue d'ensemble des préparations du jour.</p>
+                </div>
+            </div>
+
+            <!-- KPIs -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div class="bg-brand text-white rounded-[2rem] p-6 shadow-soft relative overflow-hidden">
+                    <div class="absolute -right-4 -top-4 w-24 h-24 bg-white/20 rounded-full blur-xl"></div>
+                    <div class="flex justify-between items-start relative z-10">
+                        <div>
+                            <p class="text-xs font-bold uppercase tracking-wider opacity-80 mb-1">Total Réservations</p>
+                            <h3 id="kpiTotal" class="text-4xl font-extrabold">...</h3>
+                        </div>
+                        <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-md">
+                            <i class="fa-solid fa-users text-white"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-[2rem] p-6 border border-gray-100 shadow-sm">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs font-bold uppercase tracking-wider text-textMuted mb-1">En Préparation</p>
+                            <h3 id="kpiPrep" class="text-4xl font-extrabold text-warning">...</h3>
+                        </div>
+                        <div class="w-10 h-10 bg-orange-50 rounded-full flex items-center justify-center">
+                            <i class="fa-solid fa-fire text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-[2rem] p-6 border border-gray-100 shadow-sm">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs font-bold uppercase tracking-wider text-textMuted mb-1">Plats Prêts</p>
+                            <h3 id="kpiPret" class="text-4xl font-extrabold text-success">...</h3>
+                        </div>
+                        <div class="w-10 h-10 bg-green-50 rounded-full flex items-center justify-center">
+                            <i class="fa-solid fa-check-double text-success"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Suivi des préparations -->
+            <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+                <div class="p-6 border-b border-gray-50 flex items-center justify-between bg-surface/50">
+                    <h3 class="text-lg font-extrabold">Détail des Commandes à Préparer</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-surface text-textMuted text-[10px] uppercase tracking-widest border-b border-gray-50">
+                                <th class="p-4 font-bold">Plat</th>
+                                <th class="p-4 font-bold text-center">Quantité Réservée</th>
+                                <th class="p-4 font-bold text-center">Prêts / Servis</th>
+                                <th class="p-4 font-bold text-right">Progression</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody" class="text-sm divide-y divide-gray-50">
+                            <tr><td colspan="4" class="p-4 text-center text-textMuted">Chargement...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Gérer les Menus (Aperçu) -->
+            <div>
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-extrabold">Menus de la Semaine</h3>
+                </div>
+                <div id="menusList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- Généré par JS -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let allMenus = [];
+        let allReservations = [];
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = getUser();
+            if(user) {
+                const init = (user.prenom || 'C')[0];
+                document.getElementById('desktopAvatar').textContent = init;
+                document.getElementById('mobileAvatar').textContent = init;
+                document.getElementById('desktopUserName').textContent = user.prenom + ' ' + user.nom;
+                document.getElementById('mobileUserName').textContent = user.prenom;
+            }
+            await loadData();
+        });
+
+        async function loadData() {
+            try {
+                const resMenus = await fetchAPI('/cuisinier/menus/');
+                allMenus = resMenus.data || [];
+                
+                const resRes = await fetchAPI('/cuisinier/reservations/');
+                allReservations = resRes.data || [];
+                
+                renderDashboard();
+            } catch(e) {
+                console.error("Erreur", e);
+            }
+        }
+
+        function renderDashboard() {
+            // Filtrer pour aujourd'hui seulement
+            const todayStr = new Date().toISOString().split('T')[0];
+            
+            // Stats & Réservations pour aujourd'hui
+            let totalRes = 0;
+            let totalPret = 0;
+            let totalPrep = 0;
+
+            const resToday = allReservations.filter(r => r.menu_jour_detail.date_menu === todayStr && r.statut !== 'annule');
+            totalRes = resToday.length;
+            totalPret = resToday.filter(r => r.statut === 'prepare' || r.statut === 'consomme').length;
+            totalPrep = resToday.filter(r => r.statut === 'en_attente').length;
+
+            document.getElementById('kpiTotal').textContent = totalRes;
+            document.getElementById('kpiPret').textContent = totalPret;
+            document.getElementById('kpiPrep').textContent = totalPrep;
+
+            // Grouper les réservations par menu_jour_id pour le tableau
+            const grouped = {};
+            resToday.forEach(r => {
+                const m_id = r.menu_jour_detail.id;
+                if(!grouped[m_id]) {
+                    grouped[m_id] = {
+                        plat: r.menu_jour_detail.plat_detail,
+                        total: 0,
+                        pret: 0,
+                        reservations_en_attente: []
+                    };
+                }
+                grouped[m_id].total++;
+                if(r.statut === 'prepare' || r.statut === 'consomme') {
+                    grouped[m_id].pret++;
+                } else if(r.statut === 'en_attente') {
+                    grouped[m_id].reservations_en_attente.push(r);
+                }
+            });
+
+            const tbody = document.getElementById('tableBody');
+            if(Object.keys(grouped).length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-textMuted font-bold">Aucune réservation pour aujourd'hui.</td></tr>`;
+            } else {
+                tbody.innerHTML = Object.values(grouped).map(g => {
+                    const p = g.plat;
+                    const img = p.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&w=100&q=80';
+                    const progress = g.total > 0 ? Math.round((g.pret / g.total) * 100) : 0;
+                    const color = progress === 100 ? 'bg-success text-success' : 'bg-brand text-brand';
+
+                    return `
+                    <tr class="hover:bg-gray-50/50 transition">
+                        <td class="p-4">
+                            <div class="flex items-center">
+                                <img src="${img}" class="w-10 h-10 rounded-xl object-cover mr-3">
+                                <div><p class="font-bold text-textDark">${p.libelle}</p></div>
+                            </div>
+                        </td>
+                        <td class="p-4 text-center font-extrabold text-lg text-textDark">${g.total}</td>
+                        <td class="p-4 text-center">
+                            <div class="flex items-center justify-center space-x-3">
+                                <span class="font-bold text-lg">${g.pret}</span>
+                                ${g.reservations_en_attente.length > 0 ? 
+                                    `<button onclick="markOneReady(${g.reservations_en_attente[0].id})" class="px-3 py-1 bg-brandLight text-brand rounded-lg font-bold text-xs hover:bg-brand hover:text-white transition">Prêt +1</button>` 
+                                    : `<span class="px-3 py-1 bg-green-50 text-success rounded-lg font-bold text-xs"><i class="fa-solid fa-check"></i> Terminé</span>`}
+                            </div>
+                        </td>
+                        <td class="p-4 text-right">
+                            <div class="flex items-center justify-end space-x-3">
+                                <div class="w-24 h-2 bg-gray-100 rounded-full overflow-hidden">
+                                    <div class="h-full ${color.split(' ')[0]} rounded-full" style="width: ${progress}%"></div>
+                                </div>
+                                <span class="text-xs font-bold ${color.split(' ')[1]}">${progress}%</span>
+                            </div>
+                        </td>
+                    </tr>`;
+                }).join('');
+            }
+
+            // Rendu des menus de la semaine
+            const menusList = document.getElementById('menusList');
+            menusList.innerHTML = allMenus.map(m => {
+                const isToday = m.date_menu === todayStr;
+                const isEpuise = m.statut === 'epuise';
+                return `
+                <div class="bg-white p-4 rounded-2xl border ${isToday ? 'border-brand/50 shadow-md relative' : 'border-gray-100 shadow-sm opacity-90'}">
+                    ${isToday ? `<span class="absolute top-0 right-0 bg-brand text-white text-[10px] font-bold px-2 py-1 rounded-bl-lg rounded-tr-2xl">Aujourd'hui</span>` : ''}
+                    <p class="text-[10px] text-textMuted font-bold uppercase mb-1">${m.date_menu}</p>
+                    <h4 class="font-bold text-sm text-textDark mb-2 line-clamp-1">${m.plat_detail?.libelle || 'Plat'}</h4>
+                    ${!isEpuise ? 
+                        `<button onclick="markMenuEpuise(${m.id})" class="w-full py-2 bg-red-50 text-red-500 rounded-xl text-xs font-bold hover:bg-red-500 hover:text-white transition">Signaler Épuisé</button>` 
+                        : `<button disabled class="w-full py-2 bg-gray-100 text-textMuted rounded-xl text-xs font-bold"><i class="fa-solid fa-ban"></i> Indisponible</button>`}
+                </div>`;
+            }).join('');
+        }
+
+        async function markOneReady(reservationId) {
+            try {
+                await fetchAPI(`/cuisinier/reservations/${reservationId}/update-status/`, 'POST', { statut: 'prepare' });
+                // Recharger les données pour mettre à jour l'UI
+                await loadData();
+            } catch(e) {
+                alert("Erreur lors de la mise à jour: " + e.message);
+            }
+        }
+
+        async function markMenuEpuise(menuId) {
+            if(!confirm("Êtes-vous sûr de vouloir marquer ce menu comme épuisé ? Les employés ne pourront plus le commander.")) return;
+            try {
+                await fetchAPI(`/menus/${menuId}/`, 'PATCH', { statut: 'epuise' });
+                await loadData();
+            } catch(e) {
+                alert("Erreur: " + e.message);
+            }
+        }
+    </script>
+</body>
+</html>

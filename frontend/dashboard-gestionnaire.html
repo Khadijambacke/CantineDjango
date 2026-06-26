@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CantinEntreprise - Gestion</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script>tailwind.config={theme:{extend:{colors:{brand:'#FF5A00',brandLight:'#FFF0E6',surface:'#FDFDFD',textDark:'#1A1A1A',textMuted:'#7A7A7A',success:'#10B981',info:'#3B82F6'}}}}</script>
+<style>.no-scrollbar::-webkit-scrollbar{display:none;}.no-scrollbar{-ms-overflow-style:none;scrollbar-width:none;}</style>
+</head>
+<body class="bg-surface text-textDark antialiased flex h-screen overflow-hidden">
+
+<!-- SIDEBAR -->
+<aside class="w-64 hidden lg:flex flex-col bg-white border-r border-gray-100 p-6 flex-shrink-0">
+    <div class="flex items-center space-x-3 mb-10 pl-2">
+        <div class="w-10 h-10 bg-brand text-white rounded-xl flex items-center justify-center font-bold"><i class="fa-solid fa-utensils"></i></div>
+        <span class="font-extrabold text-lg tracking-tight">CantinEntreprise</span>
+    </div>
+    <nav class="flex-1 space-y-1">
+        <p class="text-[10px] font-bold text-textMuted uppercase tracking-widest pl-3 mb-3">Administration</p>
+        <button id="nav-vue-globale" onclick="showTab('vue-globale')" class="w-full flex items-center gap-3 px-4 py-3 bg-brandLight text-brand rounded-2xl font-bold transition text-sm"><i class="fa-solid fa-chart-line"></i>Vue Globale</button>
+        <button id="nav-employes" onclick="showTab('employes')" class="w-full flex items-center gap-3 px-4 py-3 text-textMuted hover:bg-gray-50 rounded-2xl font-bold transition text-sm"><i class="fa-solid fa-users-gear"></i>Employés</button>
+        <button id="nav-commandes" onclick="showTab('commandes')" class="w-full flex items-center gap-3 px-4 py-3 text-textMuted hover:bg-gray-50 rounded-2xl font-bold transition text-sm"><i class="fa-solid fa-list-check"></i>Commandes</button>
+        <button id="nav-facturation" onclick="showTab('facturation');loadFacturation();" class="w-full flex items-center gap-3 px-4 py-3 text-textMuted hover:bg-gray-50 rounded-2xl font-bold transition text-sm"><i class="fa-solid fa-file-invoice-dollar"></i>Facturation</button>
+        <button id="nav-notifications" onclick="showTab('notifications')" class="w-full flex items-center gap-3 px-4 py-3 text-textMuted hover:bg-gray-50 rounded-2xl font-bold transition text-sm">
+            <i class="fa-solid fa-bell"></i>Notifications
+            <span id="notifBadge" class="hidden ml-auto w-5 h-5 bg-brand text-white text-[10px] font-bold rounded-full flex items-center justify-center">0</span>
+        </button>
+    </nav>
+    <div class="bg-surface p-3 rounded-2xl border border-gray-100 flex items-center justify-between cursor-pointer hover:border-gray-200 transition mt-4" onclick="logout()">
+        <div class="flex items-center">
+            <div class="w-9 h-9 rounded-full bg-brandLight text-brand flex items-center justify-center font-bold text-sm u-avatar">G</div>
+            <div class="ml-3"><p class="text-xs font-bold u-name truncate max-w-[90px]">Gestionnaire</p><p class="text-[10px] text-textMuted">Déconnexion</p></div>
+        </div>
+        <i class="fa-solid fa-right-from-bracket text-textMuted text-xs"></i>
+    </div>
+</aside>
+
+<!-- MAIN -->
+<main class="flex-1 flex flex-col h-full overflow-hidden">
+    <header class="px-6 py-4 bg-white border-b border-gray-100 flex items-center justify-between flex-shrink-0">
+        <p class="font-extrabold text-base hidden lg:block">Administration Cantine</p>
+        <!-- Mobile tabs -->
+        <div class="flex space-x-1 text-[10px] font-bold lg:hidden">
+            <button onclick="showTab('vue-globale')" class="px-2 py-1 bg-brandLight text-brand rounded-full">Stats</button>
+            <button onclick="showTab('employes')" class="px-2 py-1 text-textMuted">Employés</button>
+            <button onclick="showTab('commandes')" class="px-2 py-1 text-textMuted">Cmds</button>
+            <button onclick="showTab('facturation');loadFacturation();" class="px-2 py-1 text-textMuted">Fact.</button>
+            <button onclick="showTab('notifications')" class="px-2 py-1 text-textMuted">Notifs</button>
+        </div>
+        <button onclick="downloadCSV()" class="px-4 py-2 bg-white border border-gray-200 text-textDark rounded-2xl font-bold text-xs hover:border-brand transition">
+            <i class="fa-solid fa-download text-brand mr-1"></i>Export CSV
+        </button>
+    </header>
+
+    <div class="flex-1 overflow-y-auto no-scrollbar">
+
+        <!-- ══ VUE GLOBALE ══ -->
+        <div id="tab-vue-globale" class="p-6 lg:p-8 space-y-6 max-w-7xl mx-auto">
+            <div><h1 class="text-2xl font-extrabold">Vue Globale</h1><p class="text-sm text-textMuted">Performances du mois en cours.</p></div>
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-5">
+                <!-- Revenu du mois -->
+                <div class="bg-brand text-white rounded-[2rem] p-6 relative overflow-hidden col-span-2 lg:col-span-1">
+                    <div class="absolute -right-4 -top-4 w-20 h-20 bg-white/20 rounded-full blur-xl"></div>
+                    <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fa-solid fa-sack-dollar text-white"></i>
+                    </div>
+                    <p class="text-xs font-bold uppercase tracking-wider opacity-80">Revenu du mois</p>
+                    <p class="text-2xl font-extrabold mt-1"><span id="kpiRevenu">...</span> <span class="text-sm opacity-70">CFA</span></p>
+                </div>
+                <!-- Repas Servis -->
+                <div class="bg-white rounded-[2rem] p-6 border border-gray-100 shadow-sm">
+                    <div class="w-10 h-10 bg-brandLight rounded-xl flex items-center justify-center mb-4">
+                        <i class="fa-solid fa-utensils text-brand"></i>
+                    </div>
+                    <p class="text-xs font-bold text-textMuted uppercase tracking-wider">Repas Servis</p>
+                    <p id="kpiRepas" class="text-2xl font-extrabold mt-1 text-textDark">...</p>
+                </div>
+                <!-- Taux Réservation -->
+                <div class="bg-white rounded-[2rem] p-6 border border-gray-100 shadow-sm">
+                    <div class="w-10 h-10 bg-green-50 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fa-solid fa-users-check text-success"></i>
+                    </div>
+                    <p class="text-xs font-bold text-textMuted uppercase tracking-wider">Taux Réservation</p>
+                    <p id="kpiTaux" class="text-2xl font-extrabold mt-1 text-success">...</p>
+                </div>
+                <!-- Factures -->
+                <div class="bg-white rounded-[2rem] p-6 border border-gray-100 shadow-sm">
+                    <div class="w-10 h-10 bg-brandLight rounded-xl flex items-center justify-center mb-4">
+                        <i class="fa-solid fa-file-invoice-dollar text-brand"></i>
+                    </div>
+                    <p class="text-xs font-bold text-textMuted uppercase tracking-wider">Factures Employés</p>
+                    <p id="kpiFactures" class="text-2xl font-extrabold mt-1 text-textDark">...</p>
+                </div>
+            </div>
+            <!-- Aperçu employés -->
+            <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+                <div class="p-5 border-b border-gray-50 flex items-center justify-between">
+                    <h3 class="font-extrabold">Aperçu des Comptes</h3>
+                    <button onclick="showTab('employes')" class="text-xs text-brand font-bold hover:underline">Gérer →</button>
+                </div>
+                <table class="w-full text-left">
+                    <thead><tr class="bg-surface text-[10px] uppercase tracking-widest text-textMuted border-b border-gray-50">
+                        <th class="p-4">Utilisateur</th><th class="p-4">Poste</th><th class="p-4">Rôle</th><th class="p-4 text-right">Dépenses</th>
+                    </tr></thead>
+                    <tbody id="empPreview"><tr><td colspan="4" class="p-6 text-center text-textMuted">Chargement...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ══ EMPLOYÉS ══ -->
+        <div id="tab-employes" class="hidden p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
+            <div class="flex items-center justify-between flex-wrap gap-4">
+                <div><h2 class="text-xl font-extrabold">Gestion des Comptes</h2><p class="text-sm text-textMuted">Ajoutez, activez ou désactivez les comptes.</p></div>
+                <button onclick="openAddUser()" class="px-5 py-2.5 bg-brand text-white rounded-2xl font-bold text-sm flex items-center gap-2 hover:-translate-y-0.5 transition shadow-lg">
+                    <i class="fa-solid fa-user-plus"></i>Ajouter un compte
+                </button>
+            </div>
+            <!-- Filtres -->
+            <div class="flex gap-2 flex-wrap">
+                <button class="emp-filter-btn px-4 py-2 bg-brand text-white rounded-2xl font-bold text-xs" onclick="filterEmp('tous')">Tous</button>
+                <button class="emp-filter-btn px-4 py-2 bg-surface text-textMuted rounded-2xl font-bold text-xs border border-gray-200" onclick="filterEmp('employe')">Employés</button>
+                <button class="emp-filter-btn px-4 py-2 bg-surface text-textMuted rounded-2xl font-bold text-xs border border-gray-200" onclick="filterEmp('cuisinier')">Cuisiniers</button>
+            </div>
+            <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+                <table class="w-full text-left">
+                    <thead><tr class="bg-surface text-[10px] uppercase tracking-widest text-textMuted border-b border-gray-50">
+                        <th class="p-4">Utilisateur</th><th class="p-4">Poste</th><th class="p-4">Rôle</th><th class="p-4 text-right">Dépenses</th><th class="p-4 text-right">Actions</th>
+                    </tr></thead>
+                    <tbody id="empFull"><tr><td colspan="5" class="p-8 text-center text-textMuted">Chargement...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ══ COMMANDES ══ -->
+        <div id="tab-commandes" class="hidden p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
+            <div class="flex items-center justify-between flex-wrap gap-4">
+                <div>
+                    <h2 class="text-xl font-extrabold">Commandes du Jour</h2>
+                    <p class="text-sm text-textMuted">Date : <span id="cmdDate" class="font-bold text-textDark"></span></p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <input type="date" id="cmdDateInput" onchange="loadCommandes(this.value)" class="h-10 px-4 bg-white border border-gray-200 rounded-2xl text-sm font-bold focus:border-brand focus:outline-none">
+                    <button onclick="loadCommandes()" class="h-10 px-4 bg-surface border border-gray-200 rounded-2xl text-sm font-bold hover:border-brand transition">Aujourd'hui</button>
+                </div>
+            </div>
+            <!-- Stats rapides -->
+            <div class="grid grid-cols-2 sm:grid-cols-5 gap-4">
+                <div class="bg-white rounded-2xl border border-gray-100 p-4 text-center shadow-sm"><p class="text-[10px] font-bold text-textMuted uppercase">Total</p><p id="cmdTotal" class="text-xl font-extrabold mt-1">-</p></div>
+                <div class="bg-white rounded-2xl border border-gray-100 p-4 text-center shadow-sm"><p class="text-[10px] font-bold text-amber-600 uppercase">En attente</p><p id="cmdAttente" class="text-xl font-extrabold text-amber-600 mt-1">-</p></div>
+                <div class="bg-white rounded-2xl border border-gray-100 p-4 text-center shadow-sm"><p class="text-[10px] font-bold text-blue-600 uppercase">Prêts</p><p id="cmdPrets" class="text-xl font-extrabold text-blue-600 mt-1">-</p></div>
+                <div class="bg-white rounded-2xl border border-gray-100 p-4 text-center shadow-sm"><p class="text-[10px] font-bold text-success uppercase">Servis</p><p id="cmdConsommes" class="text-xl font-extrabold text-success mt-1">-</p></div>
+                <div class="bg-brand text-white rounded-2xl p-4 text-center shadow-sm col-span-2 sm:col-span-1"><p class="text-[10px] font-bold opacity-80 uppercase">Revenus</p><p id="cmdRevenus" class="text-sm font-extrabold mt-1">- CFA</p></div>
+            </div>
+            <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+                <table class="w-full text-left">
+                    <thead><tr class="bg-surface text-[10px] uppercase tracking-widest text-textMuted border-b border-gray-50">
+                        <th class="p-4">Employé</th><th class="p-4">Plat</th><th class="p-4">Montant</th><th class="p-4">Heure</th><th class="p-4">Statut</th>
+                    </tr></thead>
+                    <tbody id="cmdList"><tr><td colspan="5" class="p-8 text-center text-textMuted">Chargement...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ══ FACTURATION ══ -->
+        <div id="tab-facturation" class="hidden p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
+            <div class="flex items-center justify-between">
+                <div><h2 class="text-xl font-extrabold">Facturation Mensuelle RH</h2><p class="text-sm text-textMuted">Imputations sur salaire du mois en cours.</p></div>
+                <button onclick="downloadCSV()" class="px-5 py-2.5 bg-brand text-white rounded-2xl font-bold text-sm flex items-center gap-2 hover:-translate-y-0.5 transition shadow-lg">
+                    <i class="fa-solid fa-file-excel"></i>Télécharger CSV
+                </button>
+            </div>
+            <div class="bg-white rounded-3xl border border-gray-100 shadow-sm p-6">
+                <div id="factList"><div class="p-6 text-center text-textMuted">Chargement...</div></div>
+            </div>
+        </div>
+
+        <!-- ══ NOTIFICATIONS ══ -->
+        <div id="tab-notifications" class="hidden p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
+            <div class="bg-white rounded-3xl border border-gray-100 shadow-sm p-6">
+                <h3 class="font-extrabold mb-1">Envoyer une notification</h3>
+                <p class="text-xs text-textMuted mb-5">Diffusez un message à vos équipes.</p>
+                <div class="space-y-4">
+                    <select id="broadCible" class="w-full h-11 bg-surface border border-gray-200 rounded-xl px-4 text-sm font-bold focus:border-brand focus:outline-none">
+                        <option value="tous">Tous (Employés + Cuisiniers)</option>
+                        <option value="employes">Employés uniquement</option>
+                        <option value="cuisiniers">Cuisiniers uniquement</option>
+                    </select>
+                    <input id="broadTitre" type="text" placeholder="Titre de la notification..." class="w-full h-11 bg-surface border border-gray-200 rounded-xl px-4 text-sm focus:border-brand focus:outline-none">
+                    <textarea id="broadMsg" rows="3" placeholder="Message..." class="w-full bg-surface border border-gray-200 rounded-xl px-4 py-3 text-sm focus:border-brand focus:outline-none resize-none"></textarea>
+                    <button id="broadBtn" onclick="broadcastNotif()" class="w-full h-12 bg-brand text-white rounded-2xl font-bold flex items-center justify-center gap-2 hover:-translate-y-0.5 transition">
+                        <i class="fa-solid fa-paper-plane"></i>Envoyer la notification
+                    </button>
+                </div>
+            </div>
+            <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+                <div class="p-5 border-b border-gray-50 flex items-center justify-between">
+                    <h3 class="font-extrabold">Mes notifications reçues</h3>
+                    <button onclick="loadNotifications()" class="text-xs text-brand font-bold hover:underline">Rafraîchir</button>
+                </div>
+                <div id="notifList"><div class="p-6 text-center text-textMuted text-sm">Chargement...</div></div>
+            </div>
+        </div>
+
+    </div><!-- end scroll zone -->
+</main>
+
+<!-- MODAL Ajouter Utilisateur -->
+<div id="modalAddUser" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-[2rem] w-full max-w-lg shadow-2xl overflow-hidden">
+        <div class="bg-brand text-white p-6 relative overflow-hidden">
+            <div class="absolute -right-6 -top-6 w-20 h-20 bg-white/20 rounded-full blur-xl"></div>
+            <button onclick="closeAddUser()" class="absolute top-4 right-4 w-8 h-8 bg-white/20 rounded-full flex items-center justify-center"><i class="fa-solid fa-xmark text-sm"></i></button>
+            <p class="text-xs font-bold opacity-80 mb-1 uppercase">Gestion des comptes</p>
+            <h2 class="text-xl font-extrabold">Ajouter un utilisateur</h2>
+        </div>
+        <form id="formAddUser" onsubmit="submitAddUser(event)" class="p-6 space-y-4">
+            <div class="grid grid-cols-2 gap-4">
+                <div><label class="text-[10px] font-bold text-textMuted uppercase block mb-1">Prénom</label><input id="fPrenom" required class="w-full h-10 bg-surface border border-gray-200 rounded-xl px-3 text-sm focus:border-brand focus:outline-none"></div>
+                <div><label class="text-[10px] font-bold text-textMuted uppercase block mb-1">Nom</label><input id="fNom" required class="w-full h-10 bg-surface border border-gray-200 rounded-xl px-3 text-sm focus:border-brand focus:outline-none"></div>
+            </div>
+            <div><label class="text-[10px] font-bold text-textMuted uppercase block mb-1">Email professionnel</label><input id="fEmail" type="email" required class="w-full h-10 bg-surface border border-gray-200 rounded-xl px-3 text-sm focus:border-brand focus:outline-none"></div>
+            <div class="grid grid-cols-2 gap-4">
+                <div><label class="text-[10px] font-bold text-textMuted uppercase block mb-1">Téléphone</label><input id="fTel" required class="w-full h-10 bg-surface border border-gray-200 rounded-xl px-3 text-sm focus:border-brand focus:outline-none"></div>
+                <div><label class="text-[10px] font-bold text-textMuted uppercase block mb-1">Poste / Fonction</label><input id="fPoste" required class="w-full h-10 bg-surface border border-gray-200 rounded-xl px-3 text-sm focus:border-brand focus:outline-none"></div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div><label class="text-[10px] font-bold text-textMuted uppercase block mb-1">Rôle</label>
+                    <select id="fRole" class="w-full h-10 bg-surface border border-gray-200 rounded-xl px-3 text-sm font-bold focus:border-brand focus:outline-none">
+                        <option value="employe">Employé</option><option value="cuisinier">Cuisinier</option>
+                    </select>
+                </div>
+                <div><label class="text-[10px] font-bold text-textMuted uppercase block mb-1">Mot de passe</label><input id="fPassword" type="password" required minlength="6" class="w-full h-10 bg-surface border border-gray-200 rounded-xl px-3 text-sm focus:border-brand focus:outline-none"></div>
+            </div>
+            <p id="addUserError" class="hidden text-red-500 text-xs font-bold bg-red-50 p-3 rounded-xl"></p>
+            <button id="addUserBtn" type="submit" class="w-full h-12 bg-brand text-white rounded-2xl font-bold flex items-center justify-center gap-2 hover:-translate-y-0.5 transition mt-2">
+                <i class="fa-solid fa-user-plus"></i>Créer le compte
+            </button>
+        </form>
+    </div>
+</div>
+
+<script src="assets/js/gestionnaire.js"></script>
+</body>
+</html>

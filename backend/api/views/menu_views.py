@@ -143,3 +143,42 @@ class MenuStatsView(APIView):
             'message': f"Statistiques de préparation pour le {target_date.strftime('%d/%m/%Y')}.",
             'data': result
         })
+
+class MenuDetailView(APIView):
+    """
+    GET /api/menus/<id> - Détails d'un menu
+    PATCH /api/menus/<id> - Met à jour le statut (ex: passer à 'epuise')
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self, pk):
+        try:
+            return MenuJour.objects.get(pk=pk)
+        except MenuJour.DoesNotExist:
+            return None
+
+    @extend_schema(
+        summary="Mettre à jour un menu (Cuisinier/Gestionnaire)",
+        operation_id="update_menu",
+        request=MenuJourSerializer,
+        responses={200: MenuJourSerializer, 403: OpenApiTypes.OBJECT, 404: OpenApiTypes.OBJECT}
+    )
+    def patch(self, request, pk):
+        if request.user.role not in ['cuisinier', 'gestionnaire', 'administrateur']:
+            return Response(
+                {'message': 'Accès interdit.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        menu = self.get_object(pk)
+        if not menu:
+            return Response({'message': 'Menu introuvable.'}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = MenuJourSerializer(menu, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({
+                'message': 'Menu mis à jour avec succès.',
+                'data': serializer.data
+            })
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

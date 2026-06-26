@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cantine - Menu Crispy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: '#FF5A00',
+                        brandLight: '#FFF0E6',
+                        surface: '#FDFDFD',
+                        card: '#FFFFFF',
+                        textDark: '#1A1A1A',
+                        textMuted: '#7A7A7A'
+                    },
+                    borderRadius: {
+                        '4xl': '2rem',
+                        '5xl': '2.5rem',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-brand text-textDark antialiased overflow-hidden h-screen flex flex-col">
+
+    <!-- En-tête de navigation -->
+    <header class="pt-8 px-6 z-20 flex justify-between items-center text-white">
+        <button class="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center hover:bg-white hover:text-brand transition-colors" onclick="window.history.back()">
+            <i class="fa-solid fa-chevron-left text-sm"></i>
+        </button>
+        <button class="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center hover:bg-white hover:text-brand transition-colors">
+            <i class="fa-regular fa-heart text-sm"></i>
+        </button>
+    </header>
+
+    <!-- Image du Produit Flottante -->
+    <div class="h-1/2 w-full flex justify-center items-center relative z-10">
+        <!-- Cercle décoratif -->
+        <div class="absolute w-72 h-72 bg-white/10 rounded-full blob-shape"></div>
+        <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" 
+             alt="Menu Crispy" 
+             class="w-64 h-64 object-cover animate-float drop-shadow-2xl z-10 border-4 border-transparent">
+    </div>
+
+    <!-- Panneau Blanc de Détail -->
+    <main class="flex-1 bg-white rounded-t-5xl shadow-[0_-20px_40px_rgba(0,0,0,0.1)] px-8 pt-8 pb-6 flex flex-col z-20">
+        <!-- Poignée pour le swiper style mobile -->
+        <div class="w-12 h-1.5 bg-gray-200 rounded-full mx-auto absolute top-4 left-1/2 transform -translate-x-1/2"></div>
+        
+        <div class="flex-1 overflow-y-auto hide-scrollbar pt-2">
+            <!-- Titre et prix (caché ici car on le mettra en bas) -->
+            <div class="text-center">
+                <h1 class="text-3xl font-extrabold tracking-tight">Menu Crispy</h1>
+                <p class="text-textMuted text-sm font-medium mt-2 leading-relaxed px-4">Poulet croustillant, salade fraîche, sauce maison, accompagné de frites dorées et d'une boisson.</p>
+            </div>
+
+            <!-- Tags et infos -->
+            <div class="flex justify-center items-center space-x-6 mt-6">
+                <div class="flex items-center text-sm font-bold text-textDark">
+                    <i class="fa-solid fa-star text-yellow-500 mr-1.5"></i> 4,7
+                </div>
+                <div class="flex items-center text-sm font-bold text-textDark">
+                    <i class="fa-regular fa-clock text-brand mr-1.5"></i> 20-30 min
+                </div>
+                <div class="flex items-center text-sm font-bold text-textDark">
+                    <i class="fa-solid fa-fire text-brand mr-1.5"></i> 450 kcal
+                </div>
+            </div>
+
+            <!-- Ingrédients / Options (Extra) -->
+            <div class="mt-8">
+                <h3 class="text-sm font-bold text-textDark uppercase tracking-widest mb-4">Envie d'en plus ?</h3>
+                <div class="bg-surface rounded-2xl p-3 flex items-center border border-gray-100 shadow-sm cursor-pointer group hover:border-brandLight transition">
+                    <img src="https://images.unsplash.com/photo-1562967914-608f82629710?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80" alt="Nuggets" class="w-16 h-16 rounded-xl object-cover">
+                    <div class="ml-4 flex-1">
+                        <h4 class="text-sm font-bold text-textDark">Nuggets de poulet</h4>
+                        <p class="text-xs text-textMuted">x6 pièces</p>
+                        <p class="text-sm font-extrabold mt-1">3,50 €</p>
+                    </div>
+                    <button class="w-8 h-8 rounded-full bg-brandLight text-brand font-bold flex items-center justify-center group-hover:bg-brand group-hover:text-white transition">
+                        <i class="fa-solid fa-plus text-xs"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section bas (Prix et Bouton) -->
+        <div class="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
+            <!-- Sélecteur de quantité -->
+            <div class="flex items-center bg-surface rounded-full px-2 py-1 shadow-inner border border-gray-100">
+                <button class="w-8 h-8 rounded-full text-textMuted font-bold flex items-center justify-center hover:text-brand transition">-</button>
+                <span class="w-6 text-center font-bold text-lg">1</span>
+                <button class="w-8 h-8 rounded-full text-textMuted font-bold flex items-center justify-center hover:text-brand transition">+</button>
+            </div>
+            
+            <span class="text-3xl font-extrabold text-textDark">12,90 €</span>
+        </div>
+
+        <!-- Bouton Ajouter -->
+        <button class="w-full h-16 bg-brand text-white rounded-2xl font-bold text-lg shadow-soft mt-6 transform transition hover:-translate-y-1 hover:shadow-lg active:scale-95" onclick="window.location.href='cart.html'">
+            Ajouter au panier
+        </button>
+    </main>
+
+    <script src="assets/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CantinEntreprise - Bienvenue</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: '#FF5A00',
+                        brandLight: '#FFF0E6',
+                        surface: '#FDFDFD',
+                        card: '#FFFFFF',
+                        textDark: '#1A1A1A',
+                        textMuted: '#7A7A7A'
+                    },
+                    borderRadius: {
+                        '4xl': '2rem',
+                        '5xl': '2.5rem',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-brand text-white antialiased min-h-screen flex flex-col relative overflow-hidden">
+
+    <!-- Formes organiques -->
+    <div class="absolute -top-32 -left-32 w-96 h-96 bg-white opacity-10 blob-shape z-0"></div>
+    <div class="absolute -bottom-32 -right-32 w-80 h-80 bg-white opacity-10 blob-shape z-0" style="animation-delay: -4s;"></div>
+
+    <!-- Header -->
+    <header class="pt-8 px-6 z-10 flex justify-center">
+        <div class="flex items-center space-x-2">
+            <div class="w-10 h-10 bg-white text-brand rounded-full flex items-center justify-center font-bold text-xl shadow-lg">
+                <i class="fa-solid fa-utensils text-lg"></i>
+            </div>
+            <span class="font-extrabold text-xl tracking-tight">CantinEntreprise</span>
+        </div>
+    </header>
+
+    <!-- Contenu principal : Centré aussi bien en mobile qu'en desktop -->
+    <main class="flex-1 z-10 flex flex-col justify-center items-center text-center px-6 py-12 max-w-md mx-auto w-full">
+        
+        <!-- Image -->
+        <div class="relative w-52 h-52 md:w-64 md:h-64 mb-8">
+            <div class="absolute inset-0 bg-white/20 rounded-full blob-shape scale-110"></div>
+            <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" 
+                 alt="Plat" 
+                 class="w-full h-full object-cover rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.3)] animate-float border-4 border-white/30 relative z-10">
+        </div>
+
+        <!-- Texte -->
+        <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight mb-3">
+            Mangez bien, <br> Travaillez mieux.
+        </h1>
+        <p class="text-brandLight text-sm font-medium mb-10 max-w-xs opacity-90">
+            La cantine d'entreprise nouvelle generation. Commandez vos repas en un clin d'oeil.
+        </p>
+
+        <!-- Boutons -->
+        <div class="w-full space-y-3">
+            <a href="login.html" class="block w-full h-14 bg-white text-brand rounded-2xl font-bold text-lg shadow-lg transform transition hover:-translate-y-1 active:scale-95 flex items-center justify-center">
+                Se connecter
+            </a>
+            <a href="register.html" class="block w-full h-14 bg-transparent text-white border-2 border-white/40 rounded-2xl font-bold text-lg hover:bg-white/10 transition flex items-center justify-center">
+                Creer un compte
+            </a>
+        </div>
+    </main>
+
+    <script src="assets/js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = getUser();
+            if (isAuthenticated() && user) {
+                redirectUserByRole(user.role);
+            }
+        });
+    </script>
+</body>
+</html>
