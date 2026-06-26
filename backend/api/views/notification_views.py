@@ -4,8 +4,9 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from drf_spectacular.utils import extend_schema, OpenApiTypes
 
-from ..models import Notification
+from ..models import Notification, User
 from ..serializers import NotificationSerializer
+from ..permissions import IsGestionnaire
 
 class NotificationListView(APIView):
     """
@@ -55,3 +56,62 @@ class NotificationMarkReadView(APIView):
             'message': 'Notification marquée comme lue.',
             'data': NotificationSerializer(notification).data
         })
+
+class BroadcastNotificationView(APIView):
+    """
+    POST /api/notifications/broadcast/ - Le gestionnaire envoie une notif à un groupe de users
+    Body: { titre, message, cible: 'tous' | 'employes' | 'cuisiniers' }
+    """
+    permission_classes = [IsAuthenticated, IsGestionnaire]
+
+    def post(self, request):
+        titre = request.data.get('titre', '').strip()
+        message = request.data.get('message', '').strip()
+        cible = request.data.get('cible', 'tous')
+
+        if not titre or not message:
+            return Response({'message': 'Titre et message sont requis.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if cible == 'employes':
+            destinataires = User.objects.filter(role='employe')
+        elif cible == 'cuisiniers':
+            destinataires = User.objects.filter(role='cuisinier')
+        else:
+            destinataires = User.objects.exclude(role__in=['gestionnaire', 'administrateur'])
+
+        notifs = [Notification(user=u, titre=titre, message=message) for u in destinataires]
+        Notification.objects.bulk_create(notifs)
+
+        return Response({
+            'message': f'{len(notifs)} notification(s) envoyée(s) avec succès.'
+        }, status=status.HTTP_201_CREATED)
+
+
+class MessageCuisinierView(APIView):
+    """
+    POST /api/notifications/message-cuisinier/ - Un employé envoie un message/instruction à la cuisine
+    Body: { message }
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        message = request.data.get('message', '').strip()
+
+        if not message:
+            return Response({'message': 'Le message ne peut pas être vide.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        employe = request.user
+        titre = f"Message de {employe.prenom} {employe.nom}"
+        msg_complet = f"[Instruction cuisine]\n{message}"
+
+        # Envoyer à tous les cuisiniers
+        cuisiniers = User.objects.filter(role='cuisinier')
+        if not cuisiniers.exists():
+            return Response({'message': 'Aucun cuisinier disponible pour recevoir le message.'}, status=status.HTTP_404_NOT_FOUND)
+
+        notifs = [Notification(user=c, titre=titre, message=msg_complet) for c in cuisiniers]
+        Notification.objects.bulk_create(notifs)
+
+        return Response({
+            'message': f'Votre message a été transmis à l\'équipe de cuisine.'
+        }, status=status.HTTP_201_CREATED)

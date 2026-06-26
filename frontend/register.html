@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CantinEntreprise - Inscription</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: '#FF5A00',
+                        brandLight: '#FFF0E6',
+                        surface: '#FDFDFD',
+                        card: '#FFFFFF',
+                        textDark: '#1A1A1A',
+                        textMuted: '#7A7A7A'
+                    },
+                    borderRadius: { '4xl': '2rem', '5xl': '2.5rem' }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-surface text-textDark antialiased min-h-screen flex flex-col md:flex-row">
+
+    <!-- Panneau gauche desktop -->
+    <div class="hidden md:flex md:w-1/2 bg-brand relative items-center justify-center overflow-hidden">
+        <div class="absolute -top-20 -left-20 w-72 h-72 bg-white/10 blob-shape"></div>
+        <div class="absolute -bottom-20 -right-20 w-64 h-64 bg-white/10 blob-shape" style="animation-delay:-3s;"></div>
+        <div class="relative z-10 text-center text-white px-12">
+            <div class="w-48 h-48 mx-auto mb-8 relative">
+                <div class="absolute inset-0 bg-white/20 rounded-full blob-shape scale-110"></div>
+                <img src="https://images.unsplash.com/photo-1590947132387-155cc02f3212?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" 
+                     alt="Pizza" class="w-full h-full object-cover rounded-full border-4 border-white/30 animate-float relative z-10">
+            </div>
+            <h2 class="text-3xl font-extrabold mb-3">Rejoignez la table !</h2>
+            <p class="text-white/70 text-sm font-medium">Creez votre compte et decouvrez les menus de votre cantine d'entreprise.</p>
+        </div>
+    </div>
+
+    <!-- Panneau droit formulaire -->
+    <div class="flex-1 flex flex-col justify-center px-8 py-10 md:px-16 lg:px-24 max-w-xl mx-auto w-full">
+        
+        <!-- Logo mobile -->
+        <div class="md:hidden flex items-center space-x-2 mb-8">
+            <div class="w-9 h-9 bg-brand text-white rounded-full flex items-center justify-center">
+                <i class="fa-solid fa-utensils text-sm"></i>
+            </div>
+            <span class="font-extrabold text-lg text-textDark">CantinEntreprise</span>
+        </div>
+
+        <!-- ETAPE 1 : Formulaire d'inscription -->
+        <div id="step-register">
+            <h1 class="text-3xl font-extrabold tracking-tight mb-1">Inscription</h1>
+            <p class="text-textMuted text-sm font-medium mb-6">Remplissez vos informations professionnelles.</p>
+
+            <form id="registerForm" class="space-y-4">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-xs font-bold text-textMuted uppercase tracking-wider mb-1 block">Nom</label>
+                        <input type="text" id="nom" required placeholder="Dupont" class="w-full h-11 rounded-xl bg-white border border-gray-200 px-4 text-sm focus:border-brand focus:ring-2 focus:ring-brandLight outline-none transition">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-textMuted uppercase tracking-wider mb-1 block">Prenom</label>
+                        <input type="text" id="prenom" required placeholder="Jean" class="w-full h-11 rounded-xl bg-white border border-gray-200 px-4 text-sm focus:border-brand focus:ring-2 focus:ring-brandLight outline-none transition">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-xs font-bold text-textMuted uppercase tracking-wider mb-1 block">E-mail professionnel</label>
+                    <input type="email" id="email" required placeholder="nom@entreprise.com" class="w-full h-11 rounded-xl bg-white border border-gray-200 px-4 text-sm focus:border-brand focus:ring-2 focus:ring-brandLight outline-none transition">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-xs font-bold text-textMuted uppercase tracking-wider mb-1 block">Telephone</label>
+                        <input type="tel" id="telephone" required placeholder="770001122" class="w-full h-11 rounded-xl bg-white border border-gray-200 px-4 text-sm focus:border-brand focus:ring-2 focus:ring-brandLight outline-none transition">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-textMuted uppercase tracking-wider mb-1 block">Poste</label>
+                        <input type="text" id="poste" required placeholder="Developpeur" class="w-full h-11 rounded-xl bg-white border border-gray-200 px-4 text-sm focus:border-brand focus:ring-2 focus:ring-brandLight outline-none transition">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-xs font-bold text-textMuted uppercase tracking-wider mb-1 block">Mot de passe</label>
+                    <input type="password" id="password" required placeholder="Minimum 6 caracteres" minlength="6" class="w-full h-11 rounded-xl bg-white border border-gray-200 px-4 text-sm focus:border-brand focus:ring-2 focus:ring-brandLight outline-none transition">
+                </div>
+
+                <div id="registerError" class="hidden p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-xs font-medium"></div>
+
+                <button type="submit" id="registerBtn" class="w-full h-12 bg-brand text-white rounded-xl font-bold text-base shadow-soft mt-2 transform transition hover:-translate-y-0.5 active:scale-[0.98] flex items-center justify-center">
+                    Creer mon compte
+                </button>
+            </form>
+
+            <p class="mt-6 text-center text-sm text-textMuted">Deja inscrit ? <a href="login.html" class="text-brand font-bold hover:underline">Se connecter</a></p>
+        </div>
+
+        <!-- ETAPE 2 : Verification OTP -->
+        <div id="step-otp" class="hidden">
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-brandLight text-brand rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fa-solid fa-envelope-circle-check text-2xl"></i>
+                </div>
+                <h1 class="text-2xl font-extrabold tracking-tight mb-2">Verification OTP</h1>
+                <p class="text-textMuted text-sm">Un code a 6 chiffres a ete envoye a <strong id="otpEmailDisplay" class="text-brand"></strong></p>
+            </div>
+
+            <div class="space-y-4">
+                <input type="text" id="otpCode" maxlength="6" placeholder="______" class="w-full h-14 rounded-xl bg-white border-2 border-gray-200 px-4 text-center text-2xl font-bold tracking-[0.5em] focus:border-brand outline-none transition">
+                
+                <div id="otpError" class="hidden p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-xs font-medium"></div>
+
+                <button id="verifyBtn" class="w-full h-12 bg-brand text-white rounded-xl font-bold text-base shadow-soft transform transition hover:-translate-y-0.5 active:scale-[0.98] flex items-center justify-center">
+                    Verifier le code
+                </button>
+                
+                <button id="resendBtn" class="w-full text-brand font-bold text-sm hover:underline">
+                    Renvoyer le code
+                </button>
+            </div>
+        </div>
+
+        <!-- ETAPE 3 : Succes -->
+        <div id="step-success" class="hidden text-center">
+            <div class="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i class="fa-solid fa-check text-3xl"></i>
+            </div>
+            <h1 class="text-2xl font-extrabold tracking-tight mb-2">Compte verifie !</h1>
+            <p class="text-textMuted text-sm mb-8">Votre compte est actif. Vous pouvez maintenant vous connecter.</p>
+            <a href="login.html" class="inline-block h-12 bg-brand text-white rounded-xl font-bold text-base shadow-soft px-8 leading-[3rem] hover:-translate-y-0.5 transition">
+                Aller a la connexion
+            </a>
+        </div>
+    </div>
+
+    <script src="assets/js/app.js"></script>
+    <script>
+        let registeredEmail = '';
+
+        // ETAPE 1 : Inscription -> POST /api/register/
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('registerBtn');
+            const errorDiv = document.getElementById('registerError');
+            errorDiv.classList.add('hidden');
+
+            const data = {
+                nom: document.getElementById('nom').value,
+                prenom: document.getElementById('prenom').value,
+                email: document.getElementById('email').value,
+                telephone: document.getElementById('telephone').value,
+                poste: document.getElementById('poste').value,
+                password: document.getElementById('password').value
+            };
+            registeredEmail = data.email;
+
+            setLoading(btn, true);
+            try {
+                // APPEL API : POST /api/register/
+                await fetchAPI('/register/', 'POST', data);
+                
+                // Compte cree et verifie directement (rollback OTP)
+                // On passe directement a l'ecran de succes
+                document.getElementById('step-register').classList.add('hidden');
+                document.getElementById('step-success').classList.remove('hidden');
+            } catch (err) {
+                setLoading(btn, false);
+                // Afficher les erreurs du serializer
+                let msg = err.message;
+                if (err.body && typeof err.body === 'object') {
+                    const errors = Object.values(err.body).flat();
+                    if (errors.length) msg = errors.join(' | ');
+                }
+                errorDiv.textContent = msg;
+                errorDiv.classList.remove('hidden');
+            }
+        });
+
+        // ETAPE 2 : Verification -> POST /api/verify-otp/
+        document.getElementById('verifyBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('verifyBtn');
+            const code = document.getElementById('otpCode').value;
+            const errorDiv = document.getElementById('otpError');
+            errorDiv.classList.add('hidden');
+
+            if (!code || code.length < 6) {
+                errorDiv.textContent = 'Entrez le code a 6 chiffres.';
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+
+            setLoading(btn, true);
+            try {
+                // APPEL API : POST /api/verify-otp/
+                await fetchAPI('/verify-otp/', 'POST', { email: registeredEmail, otp_code: code });
+                
+                // Passer a l'etape succes
+                document.getElementById('step-otp').classList.add('hidden');
+                document.getElementById('step-success').classList.remove('hidden');
+            } catch (err) {
+                setLoading(btn, false);
+                errorDiv.textContent = err.message;
+                errorDiv.classList.remove('hidden');
+            }
+        });
+
+        // Renvoyer OTP -> POST /api/resend-otp/
+        document.getElementById('resendBtn').addEventListener('click', async () => {
+            try {
+                // APPEL API : POST /api/resend-otp/
+                await fetchAPI('/resend-otp/', 'POST', { email: registeredEmail });
+                showToast('Nouveau code envoye !', 'info');
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        });
+    </script>
+</body>
+</html>

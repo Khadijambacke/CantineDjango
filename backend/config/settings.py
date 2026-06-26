@@ -16,7 +16,7 @@ from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-load_dotenv(BASE_DIR / '.env')      
+load_dotenv(BASE_DIR.parent / '.env')      
 # charger le .env comme dotenv dans Express
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-dev-key')
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
@@ -175,4 +175,12 @@ EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'no-reply@cantine-isi.com')
 
-APPEND_SLASH = False
+APPEND_SLASH = True
+
+# Configuration CORS : autoriser le frontend a appeler le backend
+CORS_ALLOW_ALL_ORIGINS = True  # En developpement uniquement
+CORS_ALLOW_CREDENTIALS = True
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+

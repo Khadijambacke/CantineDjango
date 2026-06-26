@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CantinEntreprise - Mes commandes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: '#FF5A00',
+                        brandLight: '#FFF0E6',
+                        surface: '#FDFDFD',
+                        card: '#FFFFFF',
+                        textDark: '#1A1A1A',
+                        textMuted: '#7A7A7A',
+                        success: '#10B981',
+                        successLight: '#D1FAE5'
+                    },
+                    borderRadius: { '4xl': '2rem', '5xl': '2.5rem' }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-surface text-textDark antialiased min-h-screen pb-24">
+    <script src="assets/js/app.js"></script>
+    <script>checkAuthGuard();</script>
+
+    <!-- Header -->
+    <header class="pt-6 px-6 pb-4 bg-white border-b border-gray-100 sticky top-0 z-30">
+        <div class="max-w-3xl mx-auto flex items-center justify-between">
+            <button class="w-9 h-9 rounded-full bg-surface flex items-center justify-center text-textDark" onclick="window.location.href='dashboard-employe.html'">
+                <i class="fa-solid fa-chevron-left text-sm"></i>
+            </button>
+            <h1 class="text-base font-bold">Mes Reservations</h1>
+            <div class="w-9"></div>
+        </div>
+    </header>
+
+    <main class="max-w-3xl mx-auto px-6 pt-6 space-y-4">
+        <div id="reservationsList">
+            <div class="text-center py-8 text-textMuted text-sm">
+                <i class="fa-solid fa-spinner fa-spin text-brand text-xl mb-2 block"></i>
+                Chargement...
+            </div>
+        </div>
+    </main>
+
+    <!-- Bottom Nav -->
+    <nav class="fixed bottom-0 w-full bg-white rounded-t-3xl shadow-[0_-8px_30px_rgba(0,0,0,0.04)] px-6 py-3 z-50">
+        <ul class="flex justify-around items-center max-w-md mx-auto">
+            <li class="text-textMuted flex flex-col items-center cursor-pointer hover:text-textDark transition" onclick="window.location.href='dashboard-employe.html'">
+                <i class="fa-solid fa-house text-lg mb-0.5"></i>
+                <span class="text-[10px] font-bold">Accueil</span>
+            </li>
+            <li class="text-brand flex flex-col items-center cursor-pointer">
+                <i class="fa-solid fa-clipboard-list text-lg mb-0.5"></i>
+                <span class="text-[10px] font-bold">Commandes</span>
+            </li>
+            <li class="text-textMuted flex flex-col items-center cursor-pointer hover:text-textDark transition" onclick="logout()">
+                <i class="fa-solid fa-right-from-bracket text-lg mb-0.5"></i>
+                <span class="text-[10px] font-bold">Deconnexion</span>
+            </li>
+        </ul>
+    </nav>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        // APPEL API : GET /api/reservations/ -> Mes reservations
+        try {
+            const res = await fetchAPI('/reservations/');
+            const reservations = res.data || [];
+            renderReservations(reservations);
+        } catch (err) {
+            document.getElementById('reservationsList').innerHTML = `<p class="text-center text-red-500 text-sm py-4">${err.message}</p>`;
+        }
+    });
+
+    function renderReservations(list) {
+        const container = document.getElementById('reservationsList');
+        if (!list.length) {
+            container.innerHTML = `
+                <div class="text-center py-12">
+                    <i class="fa-solid fa-receipt text-4xl text-gray-200 mb-3 block"></i>
+                    <p class="text-textMuted text-sm font-medium">Aucune reservation pour le moment.</p>
+                </div>`;
+            return;
+        }
+
+        const statusConfig = {
+            'en_attente': { label: 'En attente', color: 'bg-brandLight text-brand', icon: 'fa-clock' },
+            'prepare': { label: 'Prepare', color: 'bg-blue-100 text-blue-700', icon: 'fa-fire-burner' },
+            'consomme': { label: 'Consomme', color: 'bg-successLight text-success', icon: 'fa-check' },
+            'annule': { label: 'Annule', color: 'bg-gray-100 text-gray-500', icon: 'fa-ban' }
+        };
+
+        container.innerHTML = list.map(r => {
+            const menu = r.menu_jour_detail || {};
+            const plat = menu.plat_detail || {};
+            const cfg = statusConfig[r.statut] || statusConfig['en_attente'];
+            const canCancel = r.statut === 'en_attente';
+
+            return `
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-50">
+                <div class="flex items-start justify-between mb-3">
+                    <div>
+                        <h3 class="text-sm font-bold">${plat.libelle || 'Plat'}</h3>
+                        <p class="text-xs text-textMuted mt-0.5">${menu.date_menu || ''} - ${r.type_service === 'livraison' ? 'Livraison' : 'Sur place'}</p>
+                    </div>
+                    <span class="inline-flex items-center text-xs font-bold px-2 py-1 rounded-md ${cfg.color}">
+                        <i class="fa-solid ${cfg.icon} mr-1"></i> ${cfg.label}
+                    </span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <div class="text-xs text-textMuted">
+                        <span class="font-bold text-textDark">${parseFloat(menu.prix || 0).toFixed(0)} CFA</span>
+                        - QR : <span class="font-mono text-[10px]">${(r.code_qr || '').substring(0,8)}...</span>
+                    </div>
+                    ${canCancel ? `<button onclick="annulerReservation(${r.id})" class="text-xs text-red-500 font-bold hover:underline">Annuler</button>` : ''}
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    // Annuler une reservation -> DELETE /api/reservations/:id/
+    async function annulerReservation(id) {
+        if (!confirm('Annuler cette reservation ?')) return;
+        try {
+            // APPEL API : DELETE /api/reservations/:id/
+            await fetchAPI(`/reservations/${id}/`, 'DELETE');
+            showToast('Reservation annulee.', 'success');
+            // Recharger la liste
+            const res = await fetchAPI('/reservations/');
+            renderReservations(res.data || []);
+        } catch (err) {
+            showToast(err.message, 'error');
+        }
+    }
+    </script>
+</body>
+</html>

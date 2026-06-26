@@ -45,10 +45,18 @@ class RegisterView(APIView):
             otp = f"{random.randint(100000, 999999)}"
             user.otp_code = otp
             user.otp_expires_at = timezone.now() + dt_module.timedelta(minutes=10)
-            user.is_verified = False # Par défaut bloqué tant que l'e-mail n'est pas validé
+            
+            # ROLLBACK OTP : Le compte est vérifié directement pour ne pas bloquer le dev
+            # Passer à False et activer l'envoi d'email quand le SMTP sera prêt en production
+            user.is_verified = True
             user.save()
             
-            # Envoi de l'e-mail via Mailtrap
+            # On affiche le code OTP dans la console Django pour les tests
+            print(f"\n{'='*50}")
+            print(f"  OTP pour {user.email} : {otp}")
+            print(f"{'='*50}\n")
+            
+            # Tentative d'envoi de l'e-mail (non bloquant)
             try:
                 subject = "Votre code de validation OTP - Cantine ISI"
                 message = f"Bonjour {user.prenom},\n\nMerci de vous être inscrit sur l'application Cantine ISI. Voici votre code OTP de validation : {otp}\n\nCe code est valide pendant 10 minutes.\n\nCordialement,\nL'équipe Cantine ISI"
@@ -57,17 +65,13 @@ class RegisterView(APIView):
                     message,
                     settings.DEFAULT_FROM_EMAIL,
                     [user.email],
-                    fail_silently=False,
+                    fail_silently=True,  # Ne pas planter si le mail échoue
                 )
             except Exception as e:
-                # Si l'envoi échoue (ex: SMTP non configuré localement), on renvoie l'erreur pour aider au debug
-                return Response({
-                    "message": "Compte créé mais erreur lors de l'envoi de l'e-mail. Veuillez vérifier vos configurations Mailtrap.",
-                    "error": str(e)
-                }, status=status.HTTP_201_CREATED)
+                print(f"[SMTP ERROR] {e}")
                 
             return Response({
-                "message": "Compte créé avec succès ! Un e-mail contenant le code OTP a été envoyé."
+                "message": "Compte créé avec succès ! Vous pouvez vous connecter."
             }, status=status.HTTP_201_CREATED)
             
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

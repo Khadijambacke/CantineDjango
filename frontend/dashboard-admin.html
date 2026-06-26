@@ -1,0 +1,520 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CantinEntreprise - Dashboard Administrateur</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: '#FF5A00',
+                        brandLight: '#FFF0E6',
+                        surface: '#FDFDFD',
+                        card: '#FFFFFF',
+                        textDark: '#1A1A1A',
+                        textMuted: '#7A7A7A',
+                        success: '#10B981',
+                        admin: '#4F46E5', // Indigo pour l'admin
+                        adminLight: '#EEF2FF'
+                    },
+                    borderRadius: { '4xl': '2rem', '5xl': '2.5rem' },
+                    boxShadow: { 'soft': '0 10px 40px -10px rgba(0,0,0,0.08)' }
+                }
+            }
+        }
+    </script>
+    <style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-surface text-textDark antialiased flex h-screen overflow-hidden">
+    <script src="assets/js/app.js"></script>
+    <script>checkAuthGuard();</script>
+
+    <!-- ========================================== -->
+    <!-- 1. BARRE LATÉRALE GAUCHE (Desktop)         -->
+    <!-- ========================================== -->
+    <aside class="w-64 hidden lg:flex flex-col bg-white border-r border-gray-100 p-6 flex-shrink-0 z-20">
+        <!-- Logo -->
+        <div class="flex items-center space-x-3 mb-10 pl-2">
+            <div class="w-10 h-10 bg-admin text-white rounded-xl flex items-center justify-center font-bold shadow-soft">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <span class="font-extrabold text-lg tracking-tight">AdminPanel</span>
+        </div>
+
+        <!-- Menu -->
+        <nav class="flex-1 space-y-2">
+            <p class="text-[10px] font-bold text-textMuted uppercase tracking-widest pl-2 mb-3">Menu Admin</p>
+            <a href="#" class="flex items-center px-4 py-3 bg-adminLight text-admin rounded-2xl font-bold transition">
+                <i class="fa-solid fa-chart-pie w-6"></i>
+                <span class="text-sm">Vue d'ensemble</span>
+            </a>
+            <a href="#" class="flex items-center px-4 py-3 text-textMuted hover:bg-gray-50 hover:text-textDark rounded-2xl font-bold transition">
+                <i class="fa-solid fa-users w-6"></i>
+                <span class="text-sm">Employés</span>
+            </a>
+            <a href="dashboard-gestionnaire.html" class="flex items-center px-4 py-3 text-textMuted hover:bg-gray-50 hover:text-textDark rounded-2xl font-bold transition">
+                <i class="fa-solid fa-utensils w-6"></i>
+                <span class="text-sm">Menus (Gestionnaire)</span>
+            </a>
+            <a href="#" onclick="openNotificationPanel()" class="flex items-center px-4 py-3 text-textMuted hover:bg-gray-50 hover:text-textDark rounded-2xl font-bold transition">
+                <i class="fa-solid fa-paper-plane w-6"></i>
+                <span class="text-sm">Diffuser Message</span>
+            </a>
+        </nav>
+
+        <!-- Profil en bas -->
+        <div class="mt-auto bg-surface p-4 rounded-2xl border border-gray-50 flex items-center justify-between cursor-pointer hover:border-gray-200 transition" onclick="logout()">
+            <div class="flex items-center">
+                <div class="w-10 h-10 rounded-full bg-adminLight text-admin flex items-center justify-center font-bold text-sm" id="desktopAvatar">A</div>
+                <div class="ml-3">
+                    <h3 class="text-xs font-bold text-textDark line-clamp-1" id="desktopUserName">Administrateur</h3>
+                    <p class="text-[10px] text-textMuted">Déconnexion</p>
+                </div>
+            </div>
+            <i class="fa-solid fa-right-from-bracket text-textMuted text-xs"></i>
+        </div>
+    </aside>
+
+    <!-- ========================================== -->
+    <!-- 2. COLONNE CENTRALE (Contenu)              -->
+    <!-- ========================================== -->
+    <main class="flex-1 flex flex-col h-full overflow-y-auto no-scrollbar relative z-10 pb-24 lg:pb-0">
+        
+        <!-- Header Mobile (Masqué sur Desktop) -->
+        <header class="lg:hidden px-6 pt-6 pb-2 flex items-center justify-between bg-surface sticky top-0 z-30">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-full bg-adminLight text-admin flex items-center justify-center font-bold" id="mobileAvatar">A</div>
+                <div>
+                    <p class="text-[10px] text-textMuted uppercase tracking-wider">Supervision</p>
+                    <h1 class="text-sm font-bold leading-tight" id="mobileUserName">Administrateur</h1>
+                </div>
+            </div>
+            <button onclick="logout()" class="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-textMuted border border-gray-100">
+                <i class="fa-solid fa-power-off text-sm"></i>
+            </button>
+        </header>
+
+        <div class="p-6 lg:p-8 xl:p-10 space-y-8 max-w-5xl mx-auto w-full">
+            
+            <!-- Barre de Recherche et Accueil (Desktop) -->
+            <div class="hidden lg:flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-extrabold" id="desktopGreeting">Supervision Globale</h1>
+                    <p class="text-sm text-textMuted">Gérez vos employés et suivez les finances de la cantine.</p>
+                </div>
+                <div class="relative w-72">
+                    <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-textMuted text-sm"></i>
+                    <input type="text" id="searchInput" placeholder="Rechercher un employé..." class="w-full h-12 pl-11 pr-4 rounded-2xl bg-white border border-gray-100 text-sm focus:border-admin focus:ring-2 focus:ring-adminLight outline-none transition shadow-sm">
+                </div>
+            </div>
+
+            <!-- Bannière Héro (Stats Globales) -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="relative w-full rounded-[2rem] bg-admin text-white overflow-hidden shadow-soft flex flex-col justify-center p-6 md:col-span-2">
+                    <div class="absolute -top-10 -right-10 w-32 h-32 bg-white opacity-10 rounded-full"></div>
+                    <div class="absolute -bottom-10 right-10 w-24 h-24 bg-white opacity-10 rounded-full"></div>
+                    
+                    <span class="inline-block px-3 py-1 bg-white/20 rounded-full text-[10px] font-bold backdrop-blur-sm mb-3 w-max">
+                        <i class="fa-solid fa-chart-line mr-1"></i> Budget Total Dépensé
+                    </span>
+                    <h2 class="text-3xl lg:text-4xl font-extrabold mb-1" id="totalSpent">0 CFA</h2>
+                    <p class="text-sm text-white/80">Cumul des réservations ce mois-ci</p>
+                </div>
+
+                <div class="bg-white rounded-[2rem] p-6 border border-gray-100 shadow-sm flex flex-col justify-center items-center text-center">
+                    <div class="w-14 h-14 bg-brandLight text-brand rounded-full flex items-center justify-center text-xl mb-3">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                    <h3 class="text-3xl font-extrabold text-textDark" id="activeEmployees">0</h3>
+                    <p class="text-xs font-bold text-textMuted">Employés Actifs</p>
+                </div>
+            </div>
+
+            <!-- Section Employés -->
+            <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-extrabold">Employés inscrits</h3>
+                    <button class="text-xs font-bold text-admin bg-adminLight px-3 py-1.5 rounded-lg hover:bg-admin hover:text-white transition">Voir tout</button>
+                </div>
+                
+                <div class="bg-white rounded-[2rem] border border-gray-50 shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-gray-50/50">
+                                    <th class="py-3 px-5 text-[10px] font-bold text-textMuted uppercase tracking-wider">Employé</th>
+                                    <th class="py-3 px-5 text-[10px] font-bold text-textMuted uppercase tracking-wider">Solde Actuel</th>
+                                    <th class="py-3 px-5 text-[10px] font-bold text-textMuted uppercase tracking-wider">Dépensé</th>
+                                    <th class="py-3 px-5 text-[10px] font-bold text-textMuted uppercase tracking-wider text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="employeesList" class="divide-y divide-gray-50">
+                                <!-- Lignes insérées en JS -->
+                                <tr>
+                                    <td colspan="4" class="text-center py-8 text-textMuted text-sm animate-pulse">Chargement des employés...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Aperçu Rapide : Menus et Notes -->
+            <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-extrabold">Aperçu des Menus Récents</h3>
+                </div>
+                <div id="menusList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Cards insérées en JS -->
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- ========================================== -->
+    <!-- 3. COLONNE DROITE (Détails & Actions)      -->
+    <!-- ========================================== -->
+    <aside class="w-80 lg:w-96 hidden xl:flex flex-col bg-white border-l border-gray-100 flex-shrink-0 z-20 shadow-[-10px_0_30px_rgba(0,0,0,0.02)]">
+        
+        <!-- Panneau Détail Employé -->
+        <div id="employeeDetailPanel" class="flex-1 flex flex-col h-full hidden">
+            <div class="p-6 border-b border-gray-50 flex items-center justify-between">
+                <h2 class="text-xl font-extrabold">Détails Employé</h2>
+                <button onclick="showDefaultRightPanel()" class="w-8 h-8 rounded-full bg-gray-50 text-textMuted flex items-center justify-center hover:bg-gray-100">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+            <div class="p-6 flex-1 overflow-y-auto no-scrollbar">
+                <div class="text-center mb-6">
+                    <div class="w-24 h-24 rounded-full bg-brandLight text-brand text-3xl font-bold flex items-center justify-center mx-auto mb-3" id="detailAvatar">E</div>
+                    <h3 class="text-lg font-bold text-textDark" id="detailName">Nom Employé</h3>
+                    <p class="text-xs text-textMuted" id="detailEmail">email@example.com</p>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-3 mb-6">
+                    <div class="bg-surface p-4 rounded-2xl border border-gray-100 text-center">
+                        <p class="text-[10px] text-textMuted uppercase font-bold mb-1">Solde</p>
+                        <p class="text-sm font-extrabold text-admin" id="detailSolde">0 CFA</p>
+                    </div>
+                    <div class="bg-surface p-4 rounded-2xl border border-gray-100 text-center">
+                        <p class="text-[10px] text-textMuted uppercase font-bold mb-1">Commandes</p>
+                        <p class="text-sm font-extrabold text-textDark" id="detailOrdersCount">0</p>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <button onclick="openNotificationForEmployee()" class="w-full py-3 bg-brandLight text-brand rounded-xl font-bold text-sm hover:bg-brand hover:text-white transition flex items-center justify-center">
+                        <i class="fa-regular fa-bell mr-2"></i> Envoyer Notification
+                    </button>
+                    <button class="w-full py-3 bg-white border border-gray-200 text-textDark rounded-xl font-bold text-sm hover:bg-gray-50 transition flex items-center justify-center">
+                        <i class="fa-solid fa-wallet mr-2"></i> Recharger Solde
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panneau Formulaire Notification -->
+        <div id="notificationPanel" class="flex-1 flex flex-col h-full hidden">
+            <div class="p-6 border-b border-gray-50 flex items-center justify-between">
+                <h2 class="text-xl font-extrabold">Nouvelle Notification</h2>
+                <button onclick="showDefaultRightPanel()" class="w-8 h-8 rounded-full bg-gray-50 text-textMuted flex items-center justify-center hover:bg-gray-100">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+            <div class="p-6 flex-1 overflow-y-auto no-scrollbar">
+                <form id="notifForm" class="space-y-4">
+                    <div>
+                        <label class="text-xs font-bold text-textMuted uppercase tracking-wider mb-1 block">Destinataire(s)</label>
+                        <select id="notifTarget" class="w-full h-12 rounded-2xl bg-surface border border-gray-100 px-4 text-sm outline-none">
+                            <option value="all">Tous les employés</option>
+                            <!-- Options spécifiques ajoutées en JS -->
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-textMuted uppercase tracking-wider mb-1 block">Titre</label>
+                        <input type="text" id="notifTitle" required placeholder="Ex: Rappel de solde" class="w-full h-12 rounded-2xl bg-surface border border-gray-100 px-4 text-sm focus:border-admin outline-none transition shadow-sm">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-textMuted uppercase tracking-wider mb-1 block">Message</label>
+                        <textarea id="notifMessage" required rows="4" placeholder="Votre message..." class="w-full rounded-2xl bg-surface border border-gray-100 px-4 py-3 text-sm focus:border-admin outline-none transition shadow-sm resize-none"></textarea>
+                    </div>
+                    <button type="submit" id="sendNotifBtn" class="w-full h-12 bg-admin text-white rounded-2xl font-bold text-sm shadow-admin/30 shadow-lg transform transition active:scale-[0.98] mt-4 flex items-center justify-center">
+                        <i class="fa-solid fa-paper-plane mr-2"></i> Envoyer
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Panneau par Défaut (Résumé Rapide) -->
+        <div id="defaultRightPanel" class="flex-1 flex flex-col h-full">
+            <div class="p-6 border-b border-gray-50">
+                <h2 class="text-xl font-extrabold">Centre d'Action</h2>
+                <p class="text-xs text-textMuted mt-1">Sélectionnez un employé pour voir ses détails.</p>
+            </div>
+            <div class="p-6 flex-1 flex flex-col justify-center items-center text-center opacity-60">
+                <div class="w-20 h-20 bg-surface rounded-full flex items-center justify-center mb-4 border border-gray-100">
+                    <i class="fa-solid fa-hand-pointer text-3xl text-gray-300"></i>
+                </div>
+                <p class="text-sm font-bold text-textMuted">Aucune sélection</p>
+                <p class="text-xs text-textMuted mt-1 px-4">Cliquez sur "Voir" dans la liste des employés.</p>
+                
+                <div class="w-full h-[1px] bg-gray-200 my-8"></div>
+                
+                <button onclick="openNotificationPanel()" class="w-full py-4 bg-adminLight text-admin rounded-2xl font-bold text-sm hover:bg-admin hover:text-white transition group flex flex-col items-center justify-center">
+                    <i class="fa-solid fa-bullhorn text-2xl mb-2 group-hover:scale-110 transition-transform"></i>
+                    Diffuser une annonce globale
+                </button>
+            </div>
+        </div>
+
+    </aside>
+
+    <!-- ========================================== -->
+    <!-- 4. NAVIGATION MOBILE (Bottom Nav)          -->
+    <!-- ========================================== -->
+    <nav class="lg:hidden fixed bottom-0 w-full bg-white border-t border-gray-100 px-6 py-3 z-40 pb-[env(safe-area-inset-bottom)]">
+        <ul class="flex justify-around items-center max-w-md mx-auto">
+            <li class="text-admin flex flex-col items-center cursor-pointer">
+                <i class="fa-solid fa-chart-pie text-xl mb-1"></i>
+                <span class="text-[10px] font-bold">Vue</span>
+            </li>
+            <li class="text-textMuted flex flex-col items-center cursor-pointer hover:text-textDark transition" onclick="window.location.href='dashboard-gestionnaire.html'">
+                <i class="fa-solid fa-utensils text-xl mb-1"></i>
+                <span class="text-[10px] font-bold">Menus</span>
+            </li>
+            <li class="text-textMuted flex flex-col items-center cursor-pointer hover:text-textDark transition" onclick="openNotificationPanel()">
+                <i class="fa-solid fa-paper-plane text-xl mb-1"></i>
+                <span class="text-[10px] font-bold">Notif</span>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- ========================================== -->
+    <!-- LOGIQUE JAVASCRIPT                         -->
+    <!-- ========================================== -->
+    <script>
+        let allUsers = [];
+        let allMenus = [];
+        let selectedEmployee = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const currentUser = getUser();
+            if (currentUser) {
+                const initials = (currentUser.prenom || 'A')[0].toUpperCase();
+                document.getElementById('desktopAvatar').textContent = initials;
+                document.getElementById('mobileAvatar').textContent = initials;
+                document.getElementById('desktopUserName').textContent = `${currentUser.prenom} ${currentUser.nom}`;
+                document.getElementById('mobileUserName').textContent = currentUser.prenom;
+            }
+
+            await loadStatsAndUsers();
+            await loadMenusOverview();
+
+            // Recherche employés
+            document.getElementById('searchInput').addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase();
+                const filtered = allUsers.filter(u => 
+                    (u.nom || '').toLowerCase().includes(query) || 
+                    (u.prenom || '').toLowerCase().includes(query) ||
+                    (u.email || '').toLowerCase().includes(query)
+                );
+                renderEmployees(filtered);
+            });
+        });
+
+        // Simuler ou récupérer les utilisateurs (Dans un vrai projet, endpoint GET /api/users/)
+        async function loadStatsAndUsers() {
+            try {
+                // Pour l'instant, on simule une récupération car l'endpoint /api/users/ n'est pas forcément public
+                // Si vous avez un endpoint admin, utilisez fetchAPI('/users/')
+                
+                // Données factices pour la démo UI admin
+                allUsers = [
+                    { id: 1, prenom: 'Alice', nom: 'Dupont', email: 'alice@entreprise.com', solde: 15000, depense: 45000, commandes: 24 },
+                    { id: 2, prenom: 'Marc', nom: 'Koffi', email: 'marc@entreprise.com', solde: 2500, depense: 12000, commandes: 8 },
+                    { id: 3, prenom: 'Sophie', nom: 'Ndiaye', email: 'sophie@entreprise.com', solde: 500, depense: 35000, commandes: 19 },
+                    { id: 4, prenom: 'Jean', nom: 'Gomez', email: 'jean@entreprise.com', solde: 8000, depense: 5000, commandes: 3 }
+                ];
+                
+                document.getElementById('activeEmployees').textContent = allUsers.length;
+                
+                const totalSpent = allUsers.reduce((sum, u) => sum + u.depense, 0);
+                document.getElementById('totalSpent').textContent = `${totalSpent.toLocaleString('fr-FR')} CFA`;
+
+                renderEmployees(allUsers);
+                populateNotifTarget(allUsers);
+
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function renderEmployees(users) {
+            const tbody = document.getElementById('employeesList');
+            if (!users.length) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center py-6 text-textMuted text-sm">Aucun employé trouvé.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = users.map(u => `
+                <tr class="hover:bg-gray-50/50 transition border-b border-gray-50 last:border-0 group cursor-pointer" onclick="viewEmployee(${u.id})">
+                    <td class="py-3 px-5">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 rounded-full bg-brandLight text-brand flex items-center justify-center font-bold text-xs mr-3">
+                                ${u.prenom[0]}${u.nom[0]}
+                            </div>
+                            <div>
+                                <p class="text-sm font-bold text-textDark">${u.prenom} ${u.nom}</p>
+                                <p class="text-[10px] text-textMuted">${u.email}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-3 px-5">
+                        <span class="text-sm font-extrabold ${u.solde < 2000 ? 'text-red-500' : 'text-textDark'}">${u.solde.toLocaleString('fr-FR')} CFA</span>
+                    </td>
+                    <td class="py-3 px-5">
+                        <span class="text-sm font-bold text-textMuted">${u.depense.toLocaleString('fr-FR')} CFA</span>
+                    </td>
+                    <td class="py-3 px-5 text-right">
+                        <button class="w-8 h-8 rounded-full bg-white border border-gray-100 text-textMuted group-hover:bg-admin group-hover:text-white group-hover:border-admin transition flex items-center justify-center ml-auto">
+                            <i class="fa-solid fa-chevron-right text-xs"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function loadMenusOverview() {
+            try {
+                const res = await fetchAPI('/menus/');
+                allMenus = res.data || [];
+                const container = document.getElementById('menusList');
+                
+                if (!allMenus.length) {
+                    container.innerHTML = '<p class="text-textMuted text-sm">Aucun menu actif.</p>';
+                    return;
+                }
+
+                container.innerHTML = allMenus.slice(0, 4).map(m => {
+                    const plat = m.plat_detail || {};
+                    return `
+                    <div class="bg-white p-4 rounded-2xl border border-gray-50 shadow-sm flex items-center justify-between hover:border-gray-100 transition">
+                        <div class="flex items-center">
+                            <img src="${plat.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100'}" class="w-12 h-12 rounded-xl object-cover">
+                            <div class="ml-3">
+                                <h4 class="text-sm font-bold">${plat.libelle || 'Plat'}</h4>
+                                <p class="text-[10px] text-textMuted">${m.date_menu} • ${parseFloat(m.prix).toFixed(0)} CFA</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="flex items-center justify-end text-yellow-400 text-xs mb-1">
+                                <i class="fa-solid fa-star"></i><span class="font-bold text-textDark ml-1">4.8</span>
+                            </div>
+                            <span class="text-[10px] text-brand bg-brandLight px-2 py-0.5 rounded-md font-bold">${m.quantite_disponible} restants</span>
+                        </div>
+                    </div>`;
+                }).join('');
+            } catch(e) {
+                console.log(e);
+            }
+        }
+
+        // --- GESTION PANNEAU DE DROITE ---
+        function hideAllRightPanels() {
+            document.getElementById('defaultRightPanel').classList.add('hidden');
+            document.getElementById('employeeDetailPanel').classList.add('hidden');
+            document.getElementById('notificationPanel').classList.add('hidden');
+        }
+
+        function showDefaultRightPanel() {
+            hideAllRightPanels();
+            selectedEmployee = null;
+            document.getElementById('defaultRightPanel').classList.remove('hidden');
+            document.getElementById('defaultRightPanel').classList.add('flex');
+            
+            // Si mobile, scroller en haut
+            if(window.innerWidth < 1280) window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+
+        function viewEmployee(id) {
+            selectedEmployee = allUsers.find(u => u.id === id);
+            if (!selectedEmployee) return;
+
+            hideAllRightPanels();
+            
+            document.getElementById('detailAvatar').textContent = `${selectedEmployee.prenom[0]}${selectedEmployee.nom[0]}`;
+            document.getElementById('detailName').textContent = `${selectedEmployee.prenom} ${selectedEmployee.nom}`;
+            document.getElementById('detailEmail').textContent = selectedEmployee.email;
+            document.getElementById('detailSolde').textContent = `${selectedEmployee.solde.toLocaleString('fr-FR')} CFA`;
+            document.getElementById('detailOrdersCount').textContent = selectedEmployee.commandes;
+
+            document.getElementById('employeeDetailPanel').classList.remove('hidden');
+            document.getElementById('employeeDetailPanel').classList.add('flex');
+            
+            if(window.innerWidth < 1280) {
+                alert(`(Version Mobile) Détails de ${selectedEmployee.prenom} affichés. Passez sur desktop pour voir le panneau complet.`);
+            }
+        }
+
+        function openNotificationPanel() {
+            hideAllRightPanels();
+            document.getElementById('notificationPanel').classList.remove('hidden');
+            document.getElementById('notificationPanel').classList.add('flex');
+            document.getElementById('notifTarget').value = 'all';
+        }
+
+        function openNotificationForEmployee() {
+            if(!selectedEmployee) return;
+            hideAllRightPanels();
+            document.getElementById('notificationPanel').classList.remove('hidden');
+            document.getElementById('notificationPanel').classList.add('flex');
+            document.getElementById('notifTarget').value = selectedEmployee.id;
+        }
+
+        function populateNotifTarget(users) {
+            const sel = document.getElementById('notifTarget');
+            users.forEach(u => {
+                sel.insertAdjacentHTML('beforeend', `<option value="${u.id}">${u.prenom} ${u.nom}</option>`);
+            });
+        }
+
+        // Envoyer Notification
+        document.getElementById('notifForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('sendNotifBtn');
+            const originalContent = btn.innerHTML;
+            
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Envoi...';
+
+            const payload = {
+                titre: document.getElementById('notifTitle').value,
+                message: document.getElementById('notifMessage').value,
+                // user: document.getElementById('notifTarget').value // Si endpoint le gère
+            };
+
+            try {
+                // Simuler appel API: await fetchAPI('/notifications/', 'POST', payload);
+                await new Promise(r => setTimeout(r, 800)); // Fake delay
+                showToast('Notification envoyée avec succès !', 'success');
+                document.getElementById('notifForm').reset();
+                showDefaultRightPanel();
+            } catch(err) {
+                showToast(err.message || 'Erreur lors de l\'envoi', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalContent;
+            }
+        });
+    </script>
+</body>
+</html>
