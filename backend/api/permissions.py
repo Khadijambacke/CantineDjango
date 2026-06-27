@@ -36,3 +36,12 @@ class IsAdministrateur(BasePermission):
 
     def has_permission(self, request, view):
         return bool(request.user and request.user.role == 'administrateur')
+
+class IsCuisinierOrGestionnaire(BasePermission):
+    """
+    Vérifie si l'utilisateur connecté a le rôle 'cuisinier' ou 'gestionnaire'.
+    """
+    message = "Accès interdit. Cette action est réservée au personnel (cuisinier ou gestionnaire)."
+
+    def has_permission(self, request, view):
+        return bool(request.user and request.user.role in ['cuisinier', 'gestionnaire'])

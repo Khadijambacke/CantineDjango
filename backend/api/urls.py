@@ -5,8 +5,9 @@ from .views.gestionnaire_views import GestionnaireEmployesView, GestionnaireEmpl
 from .views.plat_views import PlatListCreateView, PlatDetailView
 from .views.menu_views import MenuListCreateView, MenuStatsView, MenuDetailView
 from .views.reservation_views import ReservationListCreateView, ReservationDetailView, ReservationQRCodeView
-from .views.cuisinier_views import CuisinierMenusView, CuisinierReservationsView, CuisinierUpdateStatusView, CuisinierScanQRView
+from .views.cuisinier_views import CuisinierMenusView, CuisinierReservationsView, CuisinierUpdateStatusView, CuisinierScanQRView, CuisinierEvaluationsView
 from .views.notification_views import NotificationListView, NotificationMarkReadView, BroadcastNotificationView, MessageCuisinierView
+from .views.evaluation_views import EvaluationCreateView
 
 urlpatterns = [
     # Routes d'Authentification
@@ -36,6 +37,7 @@ urlpatterns = [
     path('cuisinier/reservations/', CuisinierReservationsView.as_view(), name='cuisinier-reservations'),
     path('cuisinier/reservations/<int:pk>/update-status/', CuisinierUpdateStatusView.as_view(), name='cuisinier-update-status'),
     path('cuisinier/reservations/scan-qr/', CuisinierScanQRView.as_view(), name='cuisinier-scan-qr'),
+    path('cuisinier/evaluations/', CuisinierEvaluationsView.as_view(), name='cuisinier-evaluations'),
 
     # Routes des Notifications
     path('notifications/', NotificationListView.as_view(), name='notifications-list'),
@@ -52,4 +54,7 @@ urlpatterns = [
     path('gestionnaire/employes/', GestionnaireEmployesView.as_view(), name='gest-employes'),
     path('gestionnaire/employes/<int:pk>/', GestionnaireEmployeDetailView.as_view(), name='gest-employe-detail'),
     path('gestionnaire/commandes/', GestionnaireCommandesView.as_view(), name='gest-commandes'),
+
+    # Evaluations
+    path('evaluations/', EvaluationCreateView.as_view(), name='evaluations-create'),
 ]

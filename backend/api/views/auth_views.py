@@ -59,7 +59,7 @@ class RegisterView(APIView):
                     message,
                     settings.DEFAULT_FROM_EMAIL,
                     [user.email],
-                    fail_silently=True,  # Ne pas planter si le mail échoue
+                    fail_silently=True,  
                 )
             except Exception as e:
                 print(f"[SMTP ERROR] {e}")

@@ -28,7 +28,7 @@
         }
     </script>
 </head>
-<body class="bg-brand text-white antialiased min-h-screen flex flex-col relative overflow-hidden">
+<body class="bg-brand text-white antialiased min-h-screen flex flex-col relative overflow-x-hidden overflow-y-auto">
 
     <!-- Formes organiques -->
     <div class="absolute -top-32 -left-32 w-96 h-96 bg-white opacity-10 blob-shape z-0"></div>
@@ -45,10 +45,10 @@
     </header>
 
     <!-- Contenu principal : Centré aussi bien en mobile qu'en desktop -->
-    <main class="flex-1 z-10 flex flex-col justify-center items-center text-center px-6 py-12 max-w-md mx-auto w-full">
+    <main class="flex-1 z-10 flex flex-col justify-center items-center text-center px-6 py-6 md:py-12 max-w-md mx-auto w-full">
         
         <!-- Image -->
-        <div class="relative w-52 h-52 md:w-64 md:h-64 mb-8">
+        <div class="relative w-40 h-40 md:w-64 md:h-64 mb-6 md:mb-8 mt-4 md:mt-0">
             <div class="absolute inset-0 bg-white/20 rounded-full blob-shape scale-110"></div>
             <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" 
                  alt="Plat" 
@@ -56,10 +56,10 @@
         </div>
 
         <!-- Texte -->
-        <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight mb-3">
+        <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight mb-2 md:mb-3">
             Mangez bien, <br> Travaillez mieux.
         </h1>
-        <p class="text-brandLight text-sm font-medium mb-10 max-w-xs opacity-90">
+        <p class="text-brandLight text-sm font-medium mb-8 md:mb-10 max-w-xs opacity-90">
             La cantine d'entreprise nouvelle generation. Commandez vos repas en un clin d'oeil.
         </p>
 

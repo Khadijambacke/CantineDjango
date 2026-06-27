@@ -4,9 +4,9 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from drf_spectacular.utils import extend_schema, OpenApiTypes
 
-from ..models import MenuJour, Reservation, Notification
-from ..serializers import MenuJourSerializer, ReservationSerializer, StatutUpdateSerializer
-from ..permissions import IsCuisinier
+from ..models import MenuJour, Reservation, Notification, Evaluation
+from ..serializers import MenuJourSerializer, ReservationSerializer, StatutUpdateSerializer, EvaluationSerializer
+from ..permissions import IsCuisinier, IsCuisinierOrGestionnaire
 
 class CuisinierMenusView(APIView):
     """
@@ -168,4 +168,18 @@ class CuisinierScanQRView(APIView):
         return Response({
             'message': "QR Code scanné avec succès, repas marqué comme consommé/livré.",
             'data': ReservationSerializer(reservation).data
+        })
+
+class CuisinierEvaluationsView(APIView):
+    """
+    GET /api/cuisinier/evaluations/ - Liste toutes les notes données par les employés
+    """
+    permission_classes = [IsAuthenticated, IsCuisinierOrGestionnaire]
+    serializer_class = EvaluationSerializer
+
+    def get(self, request):
+        evaluations = Evaluation.objects.all().select_related('employe', 'plat').order_by('-date_evaluation')
+        return Response({
+            'message': 'Liste des avis récupérée avec succès.',
+            'data': EvaluationSerializer(evaluations, many=True).data
         })

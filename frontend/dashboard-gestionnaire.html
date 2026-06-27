@@ -26,13 +26,21 @@
             <i class="fa-solid fa-bell"></i>Notifications
             <span id="notifBadge" class="hidden ml-auto w-5 h-5 bg-brand text-white text-[10px] font-bold rounded-full flex items-center justify-center">0</span>
         </button>
+        <button id="nav-avis" onclick="showTab('avis')" class="w-full flex items-center gap-3 px-4 py-3 text-textMuted hover:bg-gray-50 rounded-2xl font-bold transition text-sm"><i class="fa-solid fa-star"></i>Avis & Notes</button>
     </nav>
-    <div class="bg-surface p-3 rounded-2xl border border-gray-100 flex items-center justify-between cursor-pointer hover:border-gray-200 transition mt-4" onclick="logout()">
+    <div class="bg-red-50/50 p-3 rounded-2xl border border-red-100 flex items-center justify-between cursor-pointer hover:bg-red-50 transition group mt-auto" onclick="logout()">
         <div class="flex items-center">
-            <div class="w-9 h-9 rounded-full bg-brandLight text-brand flex items-center justify-center font-bold text-sm u-avatar">G</div>
-            <div class="ml-3"><p class="text-xs font-bold u-name truncate max-w-[90px]">Gestionnaire</p><p class="text-[10px] text-textMuted">Déconnexion</p></div>
+            <div class="w-9 h-9 rounded-full bg-white shadow-sm text-red-500 flex items-center justify-center font-bold text-sm u-avatar border border-red-100">G</div>
+            <div class="ml-3">
+                <p class="text-xs font-extrabold text-red-700 u-name truncate max-w-[90px]">Gestionnaire</p>
+                <p class="text-[10px] font-bold text-red-400">Déconnexion</p>
+            </div>
         </div>
-        <i class="fa-solid fa-right-from-bracket text-textMuted text-xs"></i>
+        <div class="w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center border border-red-100 text-red-500 group-hover:bg-red-500 group-hover:text-white transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3.5 h-3.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5.636 5.636a9 9 0 1 0 12.728 0M12 3v9" />
+            </svg>
+        </div>
     </div>
 </aside>
 
@@ -47,6 +55,7 @@
             <button onclick="showTab('commandes')" class="px-2 py-1 text-textMuted">Cmds</button>
             <button onclick="showTab('facturation');loadFacturation();" class="px-2 py-1 text-textMuted">Fact.</button>
             <button onclick="showTab('notifications')" class="px-2 py-1 text-textMuted">Notifs</button>
+            <button onclick="showTab('avis')" class="px-2 py-1 text-textMuted">Avis</button>
         </div>
         <button onclick="downloadCSV()" class="px-4 py-2 bg-white border border-gray-200 text-textDark rounded-2xl font-bold text-xs hover:border-brand transition">
             <i class="fa-solid fa-download text-brand mr-1"></i>Export CSV
@@ -199,6 +208,20 @@
                     <button onclick="loadNotifications()" class="text-xs text-brand font-bold hover:underline">Rafraîchir</button>
                 </div>
                 <div id="notifList"><div class="p-6 text-center text-textMuted text-sm">Chargement...</div></div>
+            </div>
+        </div>
+
+        <!-- ══ AVIS ET NOTES ══ -->
+        <div id="tab-avis" class="hidden p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h2 class="text-xl font-extrabold">Avis & Notes des employés</h2>
+                    <p class="text-xs text-textMuted">Consultez les retours sur les plats proposés.</p>
+                </div>
+            </div>
+            
+            <div id="avisListGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="p-8 text-center text-textMuted col-span-full">Chargement des avis...</div>
             </div>
         </div>
 
