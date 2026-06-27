@@ -40,6 +40,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         model = User
         fields = ['nom', 'prenom', 'email', 'telephone', 'poste', 'password']
         
+        #EXTRAIRE TOUUT LES MAILS QUI TERMINE PAS PAR cantine.sn
     # Quand on crée un utilisateur, on doit cacher son mot de passe
     def create(self, validated_data):
         # On chiffre (hash) le mot de passe avant de le sauvegarder
