@@ -59,17 +59,28 @@
             <button id="nav-commandes" onclick="showTab('commandes')" class="w-full flex items-center px-4 py-3 text-textMuted hover:bg-gray-50 rounded-2xl font-bold transition text-sm">
                 <i class="fa-solid fa-fire-burner w-6"></i>Commandes du jour
             </button>
+            <button id="nav-avis" onclick="showTab('avis')" class="w-full flex items-center px-4 py-3 text-textMuted hover:bg-gray-50 rounded-2xl font-bold transition text-sm">
+                <i class="fa-solid fa-star w-6"></i>Avis & Notes
+            </button>
+            <button id="nav-notifications" onclick="showTab('notifications')" class="w-full flex items-center px-4 py-3 text-textMuted hover:bg-gray-50 rounded-2xl font-bold transition text-sm">
+                <i class="fa-solid fa-bell w-6"></i>Notifications
+                <span id="notifBadge" class="hidden ml-auto w-5 h-5 bg-brand text-white text-[10px] font-bold rounded-full flex items-center justify-center">0</span>
+            </button>
         </nav>
         
-        <div class="bg-surface p-3 rounded-2xl border border-gray-100 flex items-center justify-between cursor-pointer hover:border-gray-200 transition" onclick="logout()">
+        <div class="bg-red-50/50 p-3 rounded-2xl border border-red-100 flex items-center justify-between cursor-pointer hover:bg-red-50 transition group mt-auto" onclick="logout()">
             <div class="flex items-center">
-                <div class="w-9 h-9 rounded-full bg-brandLight text-brand flex items-center justify-center font-bold text-sm u-avatar">C</div>
+                <div class="w-9 h-9 rounded-full bg-white shadow-sm text-red-500 flex items-center justify-center font-bold text-sm u-avatar border border-red-100">C</div>
                 <div class="ml-3">
-                    <p class="text-xs font-bold u-name truncate max-w-[90px]">Chef</p>
-                    <p class="text-[10px] text-textMuted">Déconnexion</p>
+                    <p class="text-xs font-extrabold text-red-700 u-name truncate max-w-[90px]">Chef</p>
+                    <p class="text-[10px] font-bold text-red-400">Déconnexion</p>
                 </div>
             </div>
-            <i class="fa-solid fa-right-from-bracket text-textMuted text-xs"></i>
+            <div class="w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center border border-red-100 text-red-500 group-hover:bg-red-500 group-hover:text-white transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3.5 h-3.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5.636 5.636a9 9 0 1 0 12.728 0M12 3v9" />
+                </svg>
+            </div>
         </div>
     </aside>
 
@@ -87,6 +98,8 @@
                 <button onclick="showTab('plats')" class="px-2.5 py-1.5 text-textMuted">Plats</button>
                 <button onclick="showTab('menus')" class="px-2.5 py-1.5 text-textMuted">Menus</button>
                 <button onclick="showTab('commandes')" class="px-2.5 py-1.5 text-textMuted">Commandes</button>
+                <button onclick="showTab('avis')" class="px-2.5 py-1.5 text-textMuted">Avis</button>
+                <button onclick="showTab('notifications')" class="px-2.5 py-1.5 text-textMuted">Notifs</button>
             </div>
         </header>
 
@@ -237,6 +250,35 @@
                 <!-- Tickets Grid -->
                 <div id="commandesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <!-- Rempli par JS -->
+                </div>
+            </div>
+
+            <!-- ═══ TAB 5: AVIS ET NOTES ═══ -->
+            <div id="tab-avis" class="hidden p-6 lg:p-8 space-y-6 max-w-7xl mx-auto">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h2 class="text-xl font-extrabold">Avis & Notes des employés</h2>
+                        <p class="text-xs text-textMuted">Consultez les retours sur vos plats pour améliorer votre cuisine.</p>
+                    </div>
+                </div>
+                
+                <div id="avisListGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="p-8 text-center text-textMuted col-span-full">Chargement des avis...</div>
+                </div>
+            </div>
+
+            <!-- ═══ TAB 6: NOTIFICATIONS ═══ -->
+            <div id="tab-notifications" class="hidden p-6 lg:p-8 space-y-6 max-w-7xl mx-auto">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h2 class="text-xl font-extrabold">Notifications</h2>
+                        <p class="text-xs text-textMuted">Consultez les messages du gestionnaire ou des clients.</p>
+                    </div>
+                    <button onclick="loadNotificationsData()" class="px-4 py-2 bg-white border border-gray-200 text-textDark rounded-2xl font-bold text-xs hover:border-brand transition">Rafraîchir</button>
+                </div>
+                
+                <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden max-w-3xl">
+                    <div id="notifList"><div class="p-6 text-center text-textMuted text-sm">Chargement...</div></div>
                 </div>
             </div>
 
@@ -404,6 +446,7 @@
         let allMenus = [];
         let allReservations = [];
         let notifications = [];
+        let evaluations = [];
         let activeFilter = 'tous';
         let activeMenuSubTab = 'active';
 
@@ -430,7 +473,7 @@
             return j;
         }
 
-        const TABS = ['stats', 'plats', 'menus', 'commandes'];
+        const TABS = ['stats', 'plats', 'menus', 'commandes', 'avis', 'notifications'];
         function showTab(tab) {
             TABS.forEach(t=>{
                 const el=document.getElementById('tab-'+t);
@@ -442,7 +485,7 @@
                     btn.classList.toggle('text-textMuted',t!==tab);
                 }
             });
-            const titles = {stats:"Tableau de Bord", plats:"Gestion des Plats", menus:"Menu du Jour", commandes:"Commandes du jour"};
+            const titles = {stats:"Tableau de Bord", plats:"Gestion des Plats", menus:"Menu du Jour", commandes:"Commandes du jour", avis:"Avis & Notes", notifications:"Notifications"};
             document.getElementById('headerTitle').textContent = titles[tab] || "Espace Cuisine";
         }
 
@@ -482,14 +525,170 @@
                 const resRes = await req('/cuisinier/reservations/');
                 allReservations = resRes.data || [];
 
-                // Fetch Notifications
-                const resNotifs = await req('/notifications/');
-                notifications = resNotifs.data || [];
+                await loadNotificationsData();
+                await loadEvaluations();
 
                 renderDashboard();
             } catch(e) {
                 showToast("Erreur de synchronisation : " + e.message, "error");
             }
+        }
+
+        async function loadNotificationsData() {
+            try {
+                const r = await req('/notifications/');
+                notifications = r.data || [];
+                const unread = notifications.filter(n => !n.is_read).length;
+                const badge = document.getElementById('notifBadge');
+                if(badge) {
+                    badge.textContent = unread;
+                    badge.classList.toggle('hidden', unread === 0);
+                }
+                renderNotifList();
+            } catch(e) {
+                console.error("Erreur chargement notifs:", e);
+            }
+        }
+
+        function renderNotifList() {
+            const el = document.getElementById('notifList');
+            if(!el) return;
+            if(notifications.length === 0){
+                el.innerHTML = `<div class="py-10 text-center text-textMuted"><i class="fa-solid fa-bell-slash text-3xl opacity-20 block mb-2"></i><p class="font-bold text-sm">Aucune notification.</p></div>`;
+                return;
+            }
+            el.innerHTML = notifications.map(n => `<div class="p-4 border-b border-gray-50 last:border-0 ${!n.is_read?'bg-brandLight/30':''}">
+                <div class="flex justify-between items-start">
+                    <div class="flex-1 min-w-0 mr-3">
+                        <p class="font-bold text-sm ${!n.is_read?'text-brand':'text-textDark'}">${n.titre}</p>
+                        <p class="text-xs text-textMuted mt-1">${n.message}</p>
+                        <p class="text-[10px] text-gray-300 mt-1">${new Date(n.created_at).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}</p>
+                    </div>
+                    ${!n.is_read?`<button onclick="markRead(${n.id})" class="w-6 h-6 bg-brand text-white rounded-full text-[10px] flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-check"></i></button>`:''}
+                </div>
+            </div>`).join('');
+        }
+
+        async function markRead(id) {
+            try {
+                await req(`/notifications/${id}/read/`, 'POST');
+                await loadNotificationsData();
+            } catch(e){}
+        }
+
+        async function loadEvaluations() {
+            try {
+                const res = await req('/cuisinier/evaluations/');
+                evaluations = res.data || [];
+                renderEvaluations();
+            } catch(e) {
+                console.error("Erreur chargement avis:", e);
+            }
+        }
+
+        function renderEvaluations() {
+            const container = document.getElementById('avisListGrid');
+            if(!container) return;
+            // Retirer la grille principale pour afficher des sections par plat
+            container.className = "space-y-10";
+            
+            if(evaluations.length === 0) {
+                container.innerHTML = `<div class="p-8 text-center text-textMuted bg-white rounded-3xl border border-gray-100">Aucun avis reçu pour le moment.</div>`;
+                return;
+            }
+
+            // Grouper par plat
+            const groups = {};
+            evaluations.forEach(ev => {
+                const platId = ev.plat || (ev.plat_detail ? ev.plat_detail.id : 0);
+                if(!groups[platId]) {
+                    groups[platId] = {
+                        plat: ev.plat_detail || {libelle: 'Plat inconnu'},
+                        avis: [],
+                        totalNotes: 0
+                    };
+                }
+                groups[platId].avis.push(ev);
+                groups[platId].totalNotes += ev.note;
+            });
+
+            container.innerHTML = Object.values(groups).map(g => {
+                const avg = (g.totalNotes / g.avis.length).toFixed(1);
+                const avgRounded = Math.round(avg);
+                const img = getImageUrl(g.plat.image);
+                
+                // Calcul des barres de progression des notes (5 étoiles à 1 étoile)
+                const ratingsBreakdown = [5, 4, 3, 2, 1].map(star => {
+                    const count = g.avis.filter(a => a.note === star).length;
+                    const pct = g.avis.length ? (count / g.avis.length) * 100 : 0;
+                    return `
+                    <div class="flex items-center gap-2 text-xs text-textMuted font-bold">
+                        <span class="w-2">${star}</span>
+                        <i class="fa-solid fa-star text-brand text-[10px]"></i>
+                        <div class="flex-1 h-2 bg-surface border border-gray-100 rounded-full overflow-hidden">
+                            <div class="h-full bg-brand rounded-full" style="width: ${pct}%"></div>
+                        </div>
+                        <span class="w-4 text-right">${count}</span>
+                    </div>`;
+                }).join('');
+
+                const cardsHtml = g.avis.map(ev => {
+                    const stars = Array.from({length: 5}, (_, i) => 
+                        i < ev.note ? '<i class="fa-solid fa-star text-brand text-[11px]"></i>' : '<i class="fa-solid fa-star text-gray-200 text-[11px]"></i>'
+                    ).join('');
+                    
+                    const isDefaultComment = !ev.commentaire || ev.commentaire.trim() === '';
+                    const commentText = isDefaultComment ? '<span class="italic text-textMuted/70">Aucun commentaire laissé</span>' : ev.commentaire;
+
+                    return `
+                    <div class="border-b border-gray-100 pb-5 mb-5 last:border-0 last:pb-0 last:mb-0">
+                        <div class="flex items-center gap-1 mb-2">${stars}</div>
+                        <p class="text-sm font-bold text-textDark mb-3 leading-relaxed">${commentText}</p>
+                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center text-[11px] text-textMuted font-bold gap-2">
+                            <div class="flex items-center gap-2">
+                                <span>Par <span class="text-textDark">${ev.employe_detail?.prenom} ${ev.employe_detail?.nom}</span></span>
+                                <span class="bg-brandLight text-brand px-2 py-0.5 rounded-lg flex items-center gap-1"><i class="fa-solid fa-circle-check"></i> Repas consommé</span>
+                            </div>
+                            <span>${new Date(ev.date_evaluation).toLocaleDateString()}</span>
+                        </div>
+                    </div>`;
+                }).join('');
+
+                return `
+                <div class="bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden mb-8">
+                    <!-- En-tête du plat -->
+                    <div class="p-5 border-b border-gray-100 flex items-center gap-4 bg-surface">
+                        <img src="${img}" class="w-16 h-16 rounded-2xl object-cover shadow-sm">
+                        <h3 class="font-extrabold text-xl text-textDark">${g.plat.libelle || 'Plat inconnu'}</h3>
+                    </div>
+                    
+                    <!-- Section Jumia Style -->
+                    <div class="flex flex-col lg:flex-row">
+                        <!-- Résumé des notes (Left side) -->
+                        <div class="p-6 lg:w-1/3 lg:border-r border-gray-100 flex flex-col items-center justify-center bg-white">
+                            <h4 class="text-xs font-bold text-textMuted mb-2 uppercase tracking-widest">Avis sur ce plat</h4>
+                            <div class="text-5xl font-extrabold text-brand mb-2 flex items-baseline gap-1">
+                                ${avg} <span class="text-2xl text-textMuted font-normal">/ 5</span>
+                            </div>
+                            <div class="flex gap-1 text-brand text-lg mb-2">
+                                ${Array.from({length:5}, (_,i) => i < avgRounded ? '<i class="fa-solid fa-star"></i>' : '<i class="fa-regular fa-star text-gray-200"></i>').join('')}
+                            </div>
+                            <p class="text-xs font-bold text-textMuted mb-6">${g.avis.length} avis au total</p>
+                            
+                            <!-- Barres de progression -->
+                            <div class="w-full space-y-2 px-4">
+                                ${ratingsBreakdown}
+                            </div>
+                        </div>
+                        
+                        <!-- Liste des commentaires (Right side) -->
+                        <div class="flex-1 p-6 flex flex-col max-h-[400px] overflow-y-auto no-scrollbar bg-white">
+                            ${cardsHtml}
+                        </div>
+                    </div>
+                </div>
+                `;
+            }).join('');
         }
 
         function renderDashboard() {

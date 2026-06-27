@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.hashers import make_password
-from .models import User, Plat, MenuJour, Reservation, Notification
+from .models import User, Plat, MenuJour, Reservation, Notification, Evaluation
 
 # 1. Les Sérialiseurs (Les Traducteurs)
 # Leur rôle est de prendre les données de la base de données et de les transformer en JSON 
@@ -85,6 +85,15 @@ class ReservationSerializer(serializers.ModelSerializer):
         read_only_fields = ['employe', 'code_qr', 'statut']
 class StatutUpdateSerializer(serializers.Serializer):
     statut = serializers.ChoiceField(choices=Reservation.STATUT_CHOICES)
+
+class EvaluationSerializer(serializers.ModelSerializer):
+    plat_detail = PlatSerializer(source='plat', read_only=True)
+    employe_detail = UserSerializer(source='employe', read_only=True)
+
+    class Meta:
+        model = Evaluation
+        fields = ['id', 'employe', 'employe_detail', 'plat', 'plat_detail', 'note', 'commentaire', 'date_evaluation']
+        read_only_fields = ['employe']
 
 class NotificationSerializer(serializers.ModelSerializer):
     class Meta:

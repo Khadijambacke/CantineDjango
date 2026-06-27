@@ -390,6 +390,9 @@ function renderHistorique(){
                 ${r.statut !== 'annule' && r.statut !== 'consomme' ? `
                     <button onclick="showQRModal(${r.id})" class="px-3 h-8 rounded-xl bg-brandLight text-brand hover:bg-brand hover:text-white transition flex items-center justify-center text-[10px] font-bold shadow-sm" title="Afficher le QR Code"><i class="fa-solid fa-qrcode mr-1"></i>QR Code</button>
                 ` : ''}
+                ${r.statut === 'consomme' ? `
+                    <button onclick="openRateModal(${p.id}, '${p.libelle.replace(/'/g, "\\'")}')" class="px-3 h-8 rounded-xl bg-orange-50 text-orange-400 hover:bg-orange-400 hover:text-white transition flex items-center justify-center text-[10px] font-bold shadow-sm" title="Noter ce plat"><i class="fa-solid fa-star mr-1"></i>Noter</button>
+                ` : ''}
             </div>
         </div>`;
     }).join('');
@@ -642,3 +645,87 @@ function closeQRModal() {
     const modal = document.getElementById('modalQR');
     if (modal) modal.classList.add('hidden');
 }
+
+/* =========================================================================
+   EVALUATION D'UN PLAT (NOTER)
+   ========================================================================= */
+function openRateModal(platId, platName) {
+    document.getElementById('ratePlatId').value = platId;
+    document.getElementById('rateDishName').textContent = "Avez-vous aimé " + platName + " ?";
+    document.getElementById('rateValue').value = "0";
+    document.getElementById('rateComment').value = "";
+    document.getElementById('rateError').classList.add('hidden');
+    
+    // Reset stars
+    const stars = document.querySelectorAll('.star-btn');
+    stars.forEach(s => {
+        s.classList.remove('text-orange-400');
+        s.classList.add('text-gray-300');
+    });
+
+    document.getElementById('modalRateDish').classList.remove('hidden');
+}
+
+function closeRateModal() {
+    document.getElementById('modalRateDish').classList.add('hidden');
+}
+
+// Logique pour cliquer sur les étoiles
+document.addEventListener('DOMContentLoaded', () => {
+    const stars = document.querySelectorAll('.star-btn');
+    stars.forEach(star => {
+        star.addEventListener('click', (e) => {
+            e.preventDefault();
+            const val = parseInt(star.getAttribute('data-value'));
+            document.getElementById('rateValue').value = val;
+            
+            stars.forEach(s => {
+                const sVal = parseInt(s.getAttribute('data-value'));
+                if (sVal <= val) {
+                    s.classList.remove('text-gray-300');
+                    s.classList.add('text-orange-400');
+                } else {
+                    s.classList.remove('text-orange-400');
+                    s.classList.add('text-gray-300');
+                }
+            });
+        });
+    });
+});
+
+async function submitRating(e) {
+    e.preventDefault();
+    const platId = document.getElementById('ratePlatId').value;
+    const note = parseInt(document.getElementById('rateValue').value);
+    const commentaire = document.getElementById('rateComment').value;
+    const errorDiv = document.getElementById('rateError');
+    const btn = document.getElementById('btnSubmitRate');
+
+    if (note === 0) {
+        errorDiv.textContent = "Veuillez sélectionner au moins une étoile.";
+        errorDiv.classList.remove('hidden');
+        return;
+    }
+
+    errorDiv.classList.add('hidden');
+    const oldText = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+    btn.disabled = true;
+
+    try {
+        await req('/evaluations/', 'POST', {
+            plat: platId,
+            note: note,
+            commentaire: commentaire
+        });
+        showToast('Merci pour votre note !', 'success');
+        closeRateModal();
+    } catch (err) {
+        errorDiv.textContent = err.message || "Erreur lors de l'envoi de la note.";
+        errorDiv.classList.remove('hidden');
+    } finally {
+        btn.innerHTML = oldText;
+        btn.disabled = false;
+    }
+}
+
