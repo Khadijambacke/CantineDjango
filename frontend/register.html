@@ -128,7 +128,7 @@
 
         <!-- ETAPE 3 : Succes -->
         <div id="step-success" class="hidden text-center">
-            <div class="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
+            <div class="w-20 h-20 bg-brandLight text-brand rounded-full flex items-center justify-center mx-auto mb-6">
                 <i class="fa-solid fa-check text-3xl"></i>
             </div>
             <h1 class="text-2xl font-extrabold tracking-tight mb-2">Compte verifie !</h1>
@@ -165,10 +165,10 @@
                 // APPEL API : POST /api/register/
                 await fetchAPI('/register/', 'POST', data);
                 
-                // Compte cree et verifie directement (rollback OTP)
-                // On passe directement a l'ecran de succes
+                // Afficher l'écran de saisie du code OTP (Double Authentification)
                 document.getElementById('step-register').classList.add('hidden');
-                document.getElementById('step-success').classList.remove('hidden');
+                document.getElementById('otpEmailDisplay').textContent = registeredEmail;
+                document.getElementById('step-otp').classList.remove('hidden');
             } catch (err) {
                 setLoading(btn, false);
                 // Afficher les erreurs du serializer

@@ -46,9 +46,9 @@ class RegisterView(APIView):
             user.otp_code = otp
             user.otp_expires_at = timezone.now() + dt_module.timedelta(minutes=10)
             
-            # ROLLBACK OTP : Le compte est vérifié directement pour ne pas bloquer le dev
-            # Passer à False et activer l'envoi d'email quand le SMTP sera prêt en production
-            user.is_verified = True
+            # L'OTP EST MAINTENANT ACTIF
+            # L'utilisateur doit valider son compte avec le code reçu par e-mail ou affiché dans la console
+            user.is_verified = False
             user.save()
             
             # On affiche le code OTP dans la console Django pour les tests
@@ -58,8 +58,8 @@ class RegisterView(APIView):
             
             # Tentative d'envoi de l'e-mail (non bloquant)
             try:
-                subject = "Votre code de validation OTP - Cantine ISI"
-                message = f"Bonjour {user.prenom},\n\nMerci de vous être inscrit sur l'application Cantine ISI. Voici votre code OTP de validation : {otp}\n\nCe code est valide pendant 10 minutes.\n\nCordialement,\nL'équipe Cantine ISI"
+                subject = "Votre code de validation OTP - Cantine Entreprise"
+                message = f"Bonjour {user.prenom},\n\nMerci de vous être inscrit sur l'application Cantine Entreprise. Voici votre code OTP de validation : {otp}\n\nCe code est valide pendant 10 minutes.\n\nCordialement,\nL'équipe Cantine Entreprise"
                 send_mail(
                     subject,
                     message,
@@ -135,8 +135,8 @@ class ResendOTPView(APIView):
 
         # Envoi de l'e-mail
         try:
-            subject = "Votre nouveau code de validation OTP - Cantine ISI"
-            message = f"Bonjour {user.prenom},\n\nVoici votre nouveau code OTP de validation : {otp}\n\nCe code est valide pendant 10 minutes.\n\nCordialement,\nL'équipe Cantine ISI"
+            subject = "Votre nouveau code de validation OTP - Cantine Entreprise"
+            message = f"Bonjour {user.prenom},\n\nVoici votre nouveau code OTP de validation : {otp}\n\nCe code est valide pendant 10 minutes.\n\nCordialement,\nL'équipe Cantine Entreprise"
             send_mail(
                 subject,
                 message,
