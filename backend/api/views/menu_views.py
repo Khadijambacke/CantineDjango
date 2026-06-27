@@ -3,7 +3,6 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from drf_spectacular.utils import extend_schema, OpenApiTypes, OpenApiParameter
 
 from ..models import MenuJour, Reservation
 from ..serializers import MenuJourSerializer
@@ -16,16 +15,6 @@ class MenuListCreateView(APIView):
     permission_classes = [IsAuthenticated]
     serializer_class = MenuJourSerializer
 
-    @extend_schema(
-        summary="Lister les menus planifiés",
-        operation_id="list_menus",
-        parameters=[
-            OpenApiParameter(
-                name="all",
-                type=OpenApiTypes.BOOL,
-                location=OpenApiParameter.QUERY,
-                description="Si true et si l'utilisateur est staff, retourne l'historique complet."
-            )
         ],
         responses={200: MenuJourSerializer(many=True)}
     )
@@ -45,12 +34,6 @@ class MenuListCreateView(APIView):
             'data': serializer.data
         })
 
-    @extend_schema(
-        summary="Planifier un plat à une date (Menu)",
-        operation_id="create_menu",
-        request=MenuJourSerializer,
-        responses={201: MenuJourSerializer, 400: OpenApiTypes.OBJECT, 403: OpenApiTypes.OBJECT}
-    )
     def post(self, request):
         # Restriction d'accès aux rôles autorisés
         if request.user.role not in ['cuisinier', 'gestionnaire', 'administrateur']:
@@ -78,16 +61,6 @@ class MenuStatsView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(
-        summary="Statistiques des plats réservés à préparer",
-        operation_id="menu_stats",
-        parameters=[
-            OpenApiParameter(
-                name="date",
-                type=OpenApiTypes.STR,
-                location=OpenApiParameter.QUERY,
-                description="Date recherchée au format YYYY-MM-DD. Par défaut: demain."
-            )
         ],
         responses={200: OpenApiTypes.OBJECT, 400: OpenApiTypes.OBJECT, 403: OpenApiTypes.OBJECT}
     )
@@ -157,12 +130,6 @@ class MenuDetailView(APIView):
         except MenuJour.DoesNotExist:
             return None
 
-    @extend_schema(
-        summary="Mettre à jour un menu (Cuisinier/Gestionnaire)",
-        operation_id="update_menu",
-        request=MenuJourSerializer,
-        responses={200: MenuJourSerializer, 403: OpenApiTypes.OBJECT, 404: OpenApiTypes.OBJECT}
-    )
     def patch(self, request, pk):
         if request.user.role not in ['cuisinier', 'gestionnaire', 'administrateur']:
             return Response(
@@ -183,11 +150,6 @@ class MenuDetailView(APIView):
             })
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @extend_schema(
-        summary="Supprimer un menu du planning (Cuisinier/Gestionnaire)",
-        operation_id="delete_menu",
-        responses={200: OpenApiTypes.OBJECT, 403: OpenApiTypes.OBJECT, 404: OpenApiTypes.OBJECT}
-    )
     def delete(self, request, pk):
         if request.user.role not in ['cuisinier', 'gestionnaire', 'administrateur']:
             return Response(

@@ -10,7 +10,6 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from drf_spectacular.utils import extend_schema, OpenApiTypes
 
 from ..models import User
 from ..serializers import UserSerializer, RegisterSerializer, LoginSerializer
@@ -30,11 +29,6 @@ class RegisterView(APIView):
     permission_classes = [AllowAny]
     serializer_class = RegisterSerializer
 
-    @extend_schema(
-        summary="Inscription d'un nouvel employé",
-        request=RegisterSerializer,
-        responses={201: OpenApiTypes.OBJECT, 400: OpenApiTypes.OBJECT}
-    )
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
         
@@ -157,11 +151,6 @@ class LoginView(APIView):
     permission_classes = [AllowAny]
     serializer_class = LoginSerializer
 
-    @extend_schema(
-        summary="Connexion de l'utilisateur",
-        request=LoginSerializer,
-        responses={200: OpenApiTypes.OBJECT, 401: OpenApiTypes.OBJECT}
-    )
     def post(self, request):
         email = request.data.get('email')
         password = request.data.get('password')
@@ -196,11 +185,6 @@ class LogoutView(APIView):
     """
     permission_classes = [IsAuthenticated]
     
-    @extend_schema(
-        summary="Déconnexion de l'utilisateur",
-        request=None,
-        responses={200: OpenApiTypes.OBJECT}
-    )
     def post(self, request):
         return Response({
             'message': 'Déconnexion réussie. Supprimez le token côté client.'
@@ -211,10 +195,6 @@ class MeView(APIView):
     permission_classes = [IsAuthenticated]
     serializer_class = UserSerializer
     
-    @extend_schema(
-        summary="Récupérer le profil connecté",
-        responses={200: UserSerializer}
-    )
     def get(self, request):
         return Response({
             'message': 'Profil récupéré.',

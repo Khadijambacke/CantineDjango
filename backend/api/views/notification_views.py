@@ -2,7 +2,6 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from drf_spectacular.utils import extend_schema, OpenApiTypes
 
 from ..models import Notification, User
 from ..serializers import NotificationSerializer
@@ -15,11 +14,6 @@ class NotificationListView(APIView):
     permission_classes = [IsAuthenticated]
     serializer_class = NotificationSerializer
 
-    @extend_schema(
-        summary="Liste des notifications de l'utilisateur",
-        operation_id="list_notifications",
-        responses={200: NotificationSerializer(many=True)}
-    )
     def get(self, request):
         # On ne récupère que les notifications de l'utilisateur connecté
         notifications = Notification.objects.filter(user=request.user).order_by('-created_at')
@@ -35,11 +29,6 @@ class NotificationMarkReadView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(
-        summary="Marquer une notification comme lue",
-        operation_id="mark_notification_read",
-        responses={200: OpenApiTypes.OBJECT, 403: OpenApiTypes.OBJECT, 404: OpenApiTypes.OBJECT}
-    )
     def post(self, request, pk):
         try:
             # On s'assure que la notification appartient bien à l'utilisateur connecté

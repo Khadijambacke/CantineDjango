@@ -15,11 +15,6 @@ class CuisinierMenusView(APIView):
     permission_classes = [IsAuthenticated, IsCuisinier]
     serializer_class = MenuJourSerializer
 
-    @extend_schema(
-        summary="Liste de tous les menus de la cantine",
-        operation_id="cuisinier_menus",
-        responses={200: MenuJourSerializer(many=True)}
-    )
     def get(self, request):
         menus = MenuJour.objects.all().order_by('-date_menu')
         return Response({
@@ -34,11 +29,6 @@ class CuisinierReservationsView(APIView):
     permission_classes = [IsAuthenticated, IsCuisinier]
     serializer_class = ReservationSerializer
 
-    @extend_schema(
-        summary="Liste de toutes les réservations de la cantine",
-        operation_id="cuisinier_reservations",
-        responses={200: ReservationSerializer(many=True)}
-    )
     def get(self, request):
         reservations = (
             Reservation.objects
@@ -57,12 +47,6 @@ class CuisinierUpdateStatusView(APIView):
     permission_classes = [IsAuthenticated, IsCuisinier]
     serializer_class = StatutUpdateSerializer
 
-    @extend_schema(
-        summary="Mettre à jour le statut d'une réservation (Cuisine)",
-        operation_id="cuisinier_update_status",
-        request=StatutUpdateSerializer,
-        responses={200: OpenApiTypes.OBJECT, 400: OpenApiTypes.OBJECT, 404: OpenApiTypes.OBJECT}
-    )
     def post(self, request, pk):
         # Valider le nouveau statut
         serializer = StatutUpdateSerializer(data=request.data)
