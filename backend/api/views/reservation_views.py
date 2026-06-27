@@ -17,11 +17,6 @@ class ReservationListCreateView(APIView):
     permission_classes = [IsAuthenticated, IsEmploye]
     serializer_class = ReservationSerializer
 
-    @extend_schema(
-        summary="Lister les réservations de l'employé",
-        operation_id="list_reservations",
-        responses={200: ReservationSerializer(many=True)}
-    )
     def get(self, request):
         # Seulement les réservations de l'employé connecté
         reservations = (
@@ -35,12 +30,6 @@ class ReservationListCreateView(APIView):
             'data': ReservationSerializer(reservations, many=True).data
         })
 
-    @extend_schema(
-        summary="Réserver un repas (menu planifié)",
-        operation_id="create_reservation",
-        request=ReservationSerializer,
-        responses={201: ReservationSerializer, 400: OpenApiTypes.OBJECT}
-    )
     def post(self, request):
         # 1. Valider les données entrantes avec le sérialiseur
         serializer = ReservationSerializer(data=request.data)
@@ -132,11 +121,6 @@ class ReservationDetailView(APIView):
     permission_classes = [IsAuthenticated, IsEmploye]
     serializer_class = ReservationSerializer
 
-    @extend_schema(
-        summary="Voir les détails d'une de ses réservations",
-        operation_id="get_reservation",
-        responses={200: ReservationSerializer, 403: OpenApiTypes.OBJECT, 404: OpenApiTypes.OBJECT}
-    )
     def get(self, request, pk):
         try:
           
@@ -157,11 +141,6 @@ class ReservationDetailView(APIView):
             'data': serializer.data
         })
 
-    @extend_schema(
-        summary="Annuler une de ses réservations",
-        operation_id="cancel_reservation",
-        responses={200: OpenApiTypes.OBJECT, 400: OpenApiTypes.OBJECT, 404: OpenApiTypes.OBJECT}
-    )
     def delete(self, request, pk):
         try:
             # Un employé ne peut annuler QUE ses propres réservations
