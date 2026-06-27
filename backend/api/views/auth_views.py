@@ -31,6 +31,7 @@ class RegisterView(APIView):
     serializer_class = RegisterSerializer
 
     @extend_schema(
+        tags=['1. Authentification'],
         summary="Inscription d'un nouvel employé",
         request=RegisterSerializer,
         responses={201: OpenApiTypes.OBJECT, 400: OpenApiTypes.OBJECT}
@@ -80,6 +81,11 @@ class VerifyOTPView(APIView):
     """ Contrôleur pour la vérification du code OTP """
     permission_classes = [AllowAny]
 
+    @extend_schema(
+        tags=['1. Authentification'],
+        summary="Vérifier le code OTP"
+    )
+
     def post(self, request):
         email = request.data.get('email')
         otp_code = request.data.get('otp_code')
@@ -112,6 +118,11 @@ class VerifyOTPView(APIView):
 class ResendOTPView(APIView):
     """ Contrôleur pour renvoyer le code OTP """
     permission_classes = [AllowAny]
+
+    @extend_schema(
+        tags=['1. Authentification'],
+        summary="Renvoyer un nouveau code OTP"
+    )
 
     def post(self, request):
         email = request.data.get('email')
@@ -158,6 +169,7 @@ class LoginView(APIView):
     serializer_class = LoginSerializer
 
     @extend_schema(
+        tags=['1. Authentification'],
         summary="Connexion de l'utilisateur",
         request=LoginSerializer,
         responses={200: OpenApiTypes.OBJECT, 401: OpenApiTypes.OBJECT}
@@ -197,6 +209,7 @@ class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
     
     @extend_schema(
+        tags=['1. Authentification'],
         summary="Déconnexion de l'utilisateur",
         request=None,
         responses={200: OpenApiTypes.OBJECT}
@@ -212,6 +225,7 @@ class MeView(APIView):
     serializer_class = UserSerializer
     
     @extend_schema(
+        tags=['1. Authentification'],
         summary="Récupérer le profil connecté",
         responses={200: UserSerializer}
     )

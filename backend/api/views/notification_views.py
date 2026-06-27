@@ -16,6 +16,7 @@ class NotificationListView(APIView):
     serializer_class = NotificationSerializer
 
     @extend_schema(
+        tags=['6. Notifications'],
         summary="Liste des notifications de l'utilisateur",
         operation_id="list_notifications",
         responses={200: NotificationSerializer(many=True)}
@@ -36,6 +37,7 @@ class NotificationMarkReadView(APIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
+        tags=['6. Notifications'],
         summary="Marquer une notification comme lue",
         operation_id="mark_notification_read",
         responses={200: OpenApiTypes.OBJECT, 403: OpenApiTypes.OBJECT, 404: OpenApiTypes.OBJECT}
@@ -64,6 +66,13 @@ class BroadcastNotificationView(APIView):
     """
     permission_classes = [IsAuthenticated, IsGestionnaire]
 
+    @extend_schema(
+        tags=['6. Notifications'],
+        summary="Diffuser une notification globale (Gestionnaire)",
+        operation_id="broadcast_notification",
+        request=OpenApiTypes.OBJECT,
+        responses={201: OpenApiTypes.OBJECT, 400: OpenApiTypes.OBJECT}
+    )
     def post(self, request):
         titre = request.data.get('titre', '').strip()
         message = request.data.get('message', '').strip()
@@ -94,6 +103,13 @@ class MessageCuisinierView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        tags=['6. Notifications'],
+        summary="Envoyer un message à l'équipe de cuisine",
+        operation_id="message_cuisinier",
+        request=OpenApiTypes.OBJECT,
+        responses={201: OpenApiTypes.OBJECT, 400: OpenApiTypes.OBJECT}
+    )
     def post(self, request):
         message = request.data.get('message', '').strip()
 

@@ -3,6 +3,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 
+from drf_spectacular.utils import extend_schema, OpenApiTypes
+
 from ..serializers import EvaluationSerializer
 from ..permissions import IsEmploye
 
@@ -12,6 +14,13 @@ class EvaluationCreateView(APIView):
     """
     permission_classes = [IsAuthenticated, IsEmploye]
 
+    @extend_schema(
+        tags=['5. Évaluations'],
+        summary="Noter un plat (Employé)",
+        operation_id="create_evaluation",
+        request=EvaluationSerializer,
+        responses={201: EvaluationSerializer, 400: OpenApiTypes.OBJECT}
+    )
     def post(self, request):
         # On passe les données au sérialiseur
         serializer = EvaluationSerializer(data=request.data)

@@ -4,6 +4,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.hashers import make_password
 from django.utils import timezone
+from drf_spectacular.utils import extend_schema, OpenApiTypes
 
 from ..models import User, Reservation
 from ..serializers import UserSerializer, ReservationSerializer
@@ -17,6 +18,12 @@ class GestionnaireEmployesView(APIView):
     """
     permission_classes = [IsAuthenticated, IsGestionnaire]
 
+    @extend_schema(
+        tags=['9. Espace Gestionnaire'],
+        summary="Liste de tous les employés et cuisiniers",
+        operation_id="gestionnaire_list_employes",
+        responses={200: UserSerializer(many=True)}
+    )
     def get(self, request):
         role = request.query_params.get('role', None)
         qs = User.objects.exclude(role__in=['gestionnaire', 'administrateur']).order_by('nom')
@@ -27,6 +34,13 @@ class GestionnaireEmployesView(APIView):
             'data': UserSerializer(qs, many=True).data
         })
 
+    @extend_schema(
+        tags=['9. Espace Gestionnaire'],
+        summary="Créer un compte employé ou cuisinier",
+        operation_id="gestionnaire_create_employe",
+        request=UserSerializer,
+        responses={201: UserSerializer, 400: OpenApiTypes.OBJECT}
+    )
     def post(self, request):
         data = request.data.copy()
         # Vérifier champs obligatoires
@@ -70,6 +84,13 @@ class GestionnaireEmployeDetailView(APIView):
         except User.DoesNotExist:
             return None
 
+    @extend_schema(
+        tags=['9. Espace Gestionnaire'],
+        summary="Activer, désactiver ou modifier un compte employé",
+        operation_id="gestionnaire_update_employe",
+        request=OpenApiTypes.OBJECT,
+        responses={200: OpenApiTypes.OBJECT, 404: OpenApiTypes.OBJECT}
+    )
     def patch(self, request, pk):
         user = self.get_object(pk)
         if not user:
@@ -87,6 +108,12 @@ class GestionnaireEmployeDetailView(APIView):
             'data': UserSerializer(user).data
         })
 
+    @extend_schema(
+        tags=['9. Espace Gestionnaire'],
+        summary="Supprimer un compte employé",
+        operation_id="gestionnaire_delete_employe",
+        responses={200: OpenApiTypes.OBJECT, 404: OpenApiTypes.OBJECT}
+    )
     def delete(self, request, pk):
         user = self.get_object(pk)
         if not user:
@@ -102,6 +129,12 @@ class GestionnaireCommandesView(APIView):
     """
     permission_classes = [IsAuthenticated, IsGestionnaire]
 
+    @extend_schema(
+        tags=['9. Espace Gestionnaire'],
+        summary="Toutes les réservations de la cantine (filtrables par date)",
+        operation_id="gestionnaire_list_commandes",
+        responses={200: ReservationSerializer(many=True)}
+    )
     def get(self, request):
         date_str = request.query_params.get('date', None)
         if date_str:

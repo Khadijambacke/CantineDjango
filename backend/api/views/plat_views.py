@@ -16,6 +16,7 @@ class PlatListCreateView(APIView):
     serializer_class = PlatSerializer
 
     @extend_schema(
+        tags=['2. Plats'],
         summary="Lister tous les plats",
         operation_id="list_plats",
         responses={200: PlatSerializer(many=True)}
@@ -28,6 +29,7 @@ class PlatListCreateView(APIView):
         })
 
     @extend_schema(
+        tags=['2. Plats'],
         summary="Créer un nouveau plat",
         operation_id="create_plat",
         request=PlatSerializer,
@@ -58,6 +60,7 @@ class PlatDetailView(APIView):
     serializer_class = PlatSerializer
 
     @extend_schema(
+        tags=['2. Plats'],
         summary="Récupérer un plat par son ID",
         operation_id="get_plat",
         responses={200: PlatSerializer, 404: OpenApiTypes.OBJECT}
@@ -76,6 +79,7 @@ class PlatDetailView(APIView):
         })
 
     @extend_schema(
+        tags=['2. Plats'],
         summary="Modifier un plat par son ID",
         operation_id="update_plat",
         request=PlatSerializer,
@@ -109,6 +113,7 @@ class PlatDetailView(APIView):
         })
 
     @extend_schema(
+        tags=['2. Plats'],
         summary="Supprimer un plat par son ID",
         operation_id="delete_plat",
         responses={200: OpenApiTypes.OBJECT, 403: OpenApiTypes.OBJECT, 404: OpenApiTypes.OBJECT}

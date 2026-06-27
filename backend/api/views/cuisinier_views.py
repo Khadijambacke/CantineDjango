@@ -16,6 +16,7 @@ class CuisinierMenusView(APIView):
     serializer_class = MenuJourSerializer
 
     @extend_schema(
+        tags=['8. Espace Cuisine'],
         summary="Liste de tous les menus de la cantine",
         operation_id="cuisinier_menus",
         responses={200: MenuJourSerializer(many=True)}
@@ -35,6 +36,7 @@ class CuisinierReservationsView(APIView):
     serializer_class = ReservationSerializer
 
     @extend_schema(
+        tags=['8. Espace Cuisine'],
         summary="Liste de toutes les réservations de la cantine",
         operation_id="cuisinier_reservations",
         responses={200: ReservationSerializer(many=True)}
@@ -58,6 +60,7 @@ class CuisinierUpdateStatusView(APIView):
     serializer_class = StatutUpdateSerializer
 
     @extend_schema(
+        tags=['8. Espace Cuisine'],
         summary="Mettre à jour le statut d'une réservation (Cuisine)",
         operation_id="cuisinier_update_status",
         request=StatutUpdateSerializer,
@@ -142,6 +145,7 @@ class CuisinierScanQRView(APIView):
     permission_classes = [IsAuthenticated, IsCuisinier]
 
     @extend_schema(
+        tags=['8. Espace Cuisine'],
         summary="Scanner un QR Code pour valider une réservation",
         operation_id="cuisinier_scan_qr",
         request=OpenApiTypes.OBJECT,  # attend {"code_qr": "uuid..."}
@@ -193,6 +197,12 @@ class CuisinierEvaluationsView(APIView):
     permission_classes = [IsAuthenticated, IsCuisinierOrGestionnaire]
     serializer_class = EvaluationSerializer
 
+    @extend_schema(
+        tags=['8. Espace Cuisine'],
+        summary="Liste toutes les notes données par les employés",
+        operation_id="cuisinier_evaluations",
+        responses={200: EvaluationSerializer(many=True)}
+    )
     def get(self, request):
         evaluations = Evaluation.objects.all().select_related('employe', 'plat').order_by('-date_evaluation')
         return Response({

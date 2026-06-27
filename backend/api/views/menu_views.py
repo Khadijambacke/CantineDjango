@@ -17,6 +17,7 @@ class MenuListCreateView(APIView):
     serializer_class = MenuJourSerializer
 
     @extend_schema(
+        tags=['3. Menus du Jour'],
         summary="Lister les menus planifiés",
         operation_id="list_menus",
         parameters=[
@@ -46,6 +47,7 @@ class MenuListCreateView(APIView):
         })
 
     @extend_schema(
+        tags=['3. Menus du Jour'],
         summary="Planifier un plat à une date (Menu)",
         operation_id="create_menu",
         request=MenuJourSerializer,
@@ -79,6 +81,7 @@ class MenuStatsView(APIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
+        tags=['3. Menus du Jour'],
         summary="Statistiques des plats réservés à préparer",
         operation_id="menu_stats",
         parameters=[
@@ -158,6 +161,7 @@ class MenuDetailView(APIView):
             return None
 
     @extend_schema(
+        tags=['3. Menus du Jour'],
         summary="Mettre à jour un menu (Cuisinier/Gestionnaire)",
         operation_id="update_menu",
         request=MenuJourSerializer,
@@ -184,6 +188,7 @@ class MenuDetailView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
+        tags=['3. Menus du Jour'],
         summary="Supprimer un menu du planning (Cuisinier/Gestionnaire)",
         operation_id="delete_menu",
         responses={200: OpenApiTypes.OBJECT, 403: OpenApiTypes.OBJECT, 404: OpenApiTypes.OBJECT}

@@ -6,6 +6,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
+from drf_spectacular.utils import extend_schema, OpenApiTypes, OpenApiParameter
 
 from ..permissions import IsGestionnaire
 from ..models import Reservation, User
@@ -17,6 +18,12 @@ class DashboardGestionnaireView(APIView):
     """
     permission_classes = [IsAuthenticated, IsGestionnaire]
 
+    @extend_schema(
+        tags=['7. Administration & Finances'],
+        summary="Tableau de bord complet du Gestionnaire",
+        operation_id="dashboard_gestionnaire",
+        responses={200: OpenApiTypes.OBJECT}
+    )
     def get(self, request):
         debut_mois = timezone.now().date().replace(day=1)
 
@@ -66,6 +73,12 @@ class ExportFacturationRHView(APIView):
     """
     permission_classes = [IsAuthenticated, IsGestionnaire]
 
+    @extend_schema(
+        tags=['7. Administration & Finances'],
+        summary="Exporter les retenues sur salaire (CSV)",
+        operation_id="export_facturation",
+        responses={200: OpenApiTypes.BINARY}
+    )
     def get(self, request):
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="facturation_cantine.csv"'
@@ -99,6 +112,13 @@ class RechargerSoldeView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        tags=['7. Administration & Finances'],
+        summary="Recharger le solde d'un employé",
+        operation_id="recharger_solde",
+        request=OpenApiTypes.OBJECT,
+        responses={200: OpenApiTypes.OBJECT, 400: OpenApiTypes.OBJECT}
+    )
     def post(self, request):
         montant_str = request.data.get('montant')
         try:

@@ -155,10 +155,10 @@ SPECTACULAR_SETTINGS = {
     'APPEND_COMPONENTS': {
         'securitySchemes': {
             'jwt': {
-                'type': 'apiKey',
-                'in': 'header',
-                'name': 'Authorization',
-                'description': 'Entrez votre token sous la forme : Bearer <votre_token>'
+                'type': 'http',
+                'scheme': 'bearer',
+                'bearerFormat': 'JWT',
+                'description': 'Collez UNIQUEMENT votre token JWT brut ici (le mot "Bearer" sera ajouté automatiquement).'
             }
         }
     }

@@ -18,6 +18,7 @@ class ReservationListCreateView(APIView):
     serializer_class = ReservationSerializer
 
     @extend_schema(
+        tags=['4. Commandes & Réservations'],
         summary="Lister les réservations de l'employé",
         operation_id="list_reservations",
         responses={200: ReservationSerializer(many=True)}
@@ -36,6 +37,7 @@ class ReservationListCreateView(APIView):
         })
 
     @extend_schema(
+        tags=['4. Commandes & Réservations'],
         summary="Réserver un repas (menu planifié)",
         operation_id="create_reservation",
         request=ReservationSerializer,
@@ -133,6 +135,7 @@ class ReservationDetailView(APIView):
     serializer_class = ReservationSerializer
 
     @extend_schema(
+        tags=['4. Commandes & Réservations'],
         summary="Voir les détails d'une de ses réservations",
         operation_id="get_reservation",
         responses={200: ReservationSerializer, 403: OpenApiTypes.OBJECT, 404: OpenApiTypes.OBJECT}
@@ -158,6 +161,7 @@ class ReservationDetailView(APIView):
         })
 
     @extend_schema(
+        tags=['4. Commandes & Réservations'],
         summary="Annuler une de ses réservations",
         operation_id="cancel_reservation",
         responses={200: OpenApiTypes.OBJECT, 400: OpenApiTypes.OBJECT, 404: OpenApiTypes.OBJECT}
@@ -223,6 +227,7 @@ class ReservationQRCodeView(APIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
+        tags=['4. Commandes & Réservations'],
         summary="Générer l'image du QR Code pour une réservation",
         operation_id="generate_reservation_qr",
         responses={200: OpenApiTypes.BINARY, 403: OpenApiTypes.OBJECT, 404: OpenApiTypes.OBJECT}
