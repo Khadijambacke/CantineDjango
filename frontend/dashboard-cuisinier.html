@@ -23,6 +23,7 @@
             }
         }
     </script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -218,13 +219,18 @@
                         <p class="text-xs text-textMuted">Visualisez et mettez à jour l'état des repas commandés aujourd'hui.</p>
                     </div>
                     
-                    <!-- Filtres par statut -->
-                    <div class="flex flex-wrap gap-1 bg-white p-1 rounded-2xl border border-gray-100 shadow-sm">
+                    <!-- Filtres et actions -->
+                    <div class="flex flex-col sm:flex-row items-end gap-3">
+                        <button onclick="openQRScanner()" class="h-10 px-4 bg-gray-900 text-white rounded-xl font-bold hover:-translate-y-0.5 transition shadow-lg flex items-center text-xs">
+                            <i class="fa-solid fa-qrcode mr-2"></i>Scanner QR Code
+                        </button>
+                        <div class="flex flex-wrap gap-1 bg-white p-1 rounded-2xl border border-gray-100 shadow-sm">
                         <button onclick="filterCommandes('tous')" class="btn-cmd-filter px-4 py-2 rounded-xl text-xs font-bold bg-brand text-white transition">Tous</button>
                         <button onclick="filterCommandes('en_attente')" class="btn-cmd-filter px-4 py-2 rounded-xl text-xs font-bold text-textMuted hover:bg-gray-50 transition">En attente</button>
                         <button onclick="filterCommandes('prepare')" class="btn-cmd-filter px-4 py-2 rounded-xl text-xs font-bold text-textMuted hover:bg-gray-50 transition">Prêts</button>
                         <button onclick="filterCommandes('consomme')" class="btn-cmd-filter px-4 py-2 rounded-xl text-xs font-bold text-textMuted hover:bg-gray-50 transition">Servis</button>
                         <button onclick="filterCommandes('annule')" class="btn-cmd-filter px-4 py-2 rounded-xl text-xs font-bold text-textMuted hover:bg-gray-50 transition">Annulés</button>
+                        </div>
                     </div>
                 </div>
 
@@ -374,6 +380,19 @@
                     <button type="submit" id="btnSubmitReuseMenu" class="flex-1 h-11 bg-brand text-white rounded-xl font-bold hover:-translate-y-0.5 transition shadow-lg shadow-brand/20 text-sm">Dupliquer</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- MODAL SCANNER QR -->
+    <div id="modalQRScanner" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-[2rem] w-full max-w-md shadow-2xl p-6 relative flex flex-col items-center">
+            <button onclick="closeQRScanner()" class="absolute top-4 right-4 w-8 h-8 bg-gray-100 text-textMuted rounded-full flex items-center justify-center hover:bg-gray-200 transition z-10"><i class="fa-solid fa-xmark text-sm"></i></button>
+            <h3 class="font-extrabold text-xl mb-4"><i class="fa-solid fa-camera mr-2 text-brand"></i>Scanner un QR Code</h3>
+            <p class="text-xs text-textMuted text-center mb-4">Placez le QR Code du client devant la caméra pour marquer le repas comme servi.</p>
+            
+            <div id="reader" class="w-full rounded-2xl overflow-hidden bg-black/5 aspect-square border-2 border-brand/20"></div>
+            
+            <p id="qrScanResult" class="text-sm font-bold text-brand mt-4 min-h-[20px] text-center"></p>
         </div>
     </div>
 
@@ -1144,8 +1163,62 @@
                 showToast("Erreur lors de la duplication : " + err.message, "error");
             } finally {
                 btn.disabled = false;
+                btn.disabled = false;
                 btn.innerHTML = 'Dupliquer';
             }
+        }
+
+        // --- QR SCANNER ACTIONS ---
+        let html5QrcodeScanner = null;
+
+        function openQRScanner() {
+            document.getElementById('modalQRScanner').classList.remove('hidden');
+            document.getElementById('qrScanResult').textContent = '';
+            
+            // Initialiser le scanner
+            html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 250} }, false);
+            html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+        }
+
+        function closeQRScanner() {
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.clear().catch(error => {
+                    console.error("Failed to clear html5QrcodeScanner. ", error);
+                });
+            }
+            document.getElementById('modalQRScanner').classList.add('hidden');
+        }
+
+        async function onScanSuccess(decodedText, decodedResult) {
+            // Un seul scan réussi suffit, on arrête de scanner
+            if(html5QrcodeScanner) {
+                html5QrcodeScanner.clear();
+            }
+            document.getElementById('qrScanResult').innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Validation en cours...';
+            
+            try {
+                // Envoyer le UUID (decodedText) à l'API
+                const res = await req('/cuisinier/reservations/scan-qr/', 'POST', {
+                    code_qr: decodedText
+                });
+                
+                document.getElementById('qrScanResult').innerHTML = `<span class="text-success"><i class="fa-solid fa-circle-check mr-2"></i>${res.message}</span>`;
+                showToast(res.message, 'success');
+                
+                // Rafraîchir les données et fermer après un délai
+                await loadData();
+                setTimeout(() => {
+                    closeQRScanner();
+                }, 2000);
+            } catch (error) {
+                document.getElementById('qrScanResult').innerHTML = `<span class="text-red-500"><i class="fa-solid fa-circle-xmark mr-2"></i>${error.message}</span>`;
+                // Permettre au scanner de recommencer après erreur ?
+                // showToast(error.message, 'error');
+            }
+        }
+
+        function onScanFailure(error) {
+            // ignorer les erreurs de scan continues (pas de code trouvé)
         }
     </script>
 </body>

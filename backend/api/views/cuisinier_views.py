@@ -134,3 +134,54 @@ class CuisinierUpdateStatusView(APIView):
             'message': f"Statut mis à jour : {reservation.statut}.",
             'data': ReservationSerializer(reservation).data
         })
+
+class CuisinierScanQRView(APIView):
+    """
+    POST /api/cuisinier/reservations/scan-qr/ - Mettre à jour une réservation via scan du code QR (UUID)
+    """
+    permission_classes = [IsAuthenticated, IsCuisinier]
+
+    @extend_schema(
+        summary="Scanner un QR Code pour valider une réservation",
+        operation_id="cuisinier_scan_qr",
+        request=OpenApiTypes.OBJECT,  # attend {"code_qr": "uuid..."}
+        responses={200: OpenApiTypes.OBJECT, 400: OpenApiTypes.OBJECT, 404: OpenApiTypes.OBJECT}
+    )
+    def post(self, request):
+        code_qr = request.data.get('code_qr')
+        if not code_qr:
+            return Response({
+                'message': 'Le code QR (UUID) est requis.'
+            }, status=status.HTTP_400_BAD_REQUEST)
+            
+        try:
+            reservation = Reservation.objects.select_related('employe', 'menu_jour', 'menu_jour__plat').get(code_qr=code_qr)
+        except Reservation.DoesNotExist:
+            return Response({
+                'message': 'Réservation introuvable pour ce QR Code.'
+            }, status=status.HTTP_404_NOT_FOUND)
+            
+        # Si la réservation est déjà annulée ou consommée
+        if reservation.statut in ['annule', 'consomme']:
+            return Response({
+                'message': f"Cette réservation est déjà dans le statut : {reservation.statut}."
+            }, status=status.HTTP_400_BAD_REQUEST)
+            
+        from django.db import transaction
+        employe = reservation.employe
+        menu_jour = reservation.menu_jour
+        
+        with transaction.atomic():
+            reservation.statut = 'consomme'
+            reservation.save()
+            
+            Notification.objects.create(
+                user=employe,
+                titre="Repas consommé / livré",
+                message=f"Votre réservation pour le plat '{menu_jour.plat.libelle}' du {menu_jour.date_menu} a été scannée et marquée comme consommée. Bon appétit !"
+            )
+            
+        return Response({
+            'message': "QR Code scanné avec succès, repas marqué comme consommé/livré.",
+            'data': ReservationSerializer(reservation).data
+        })

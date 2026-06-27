@@ -139,7 +139,7 @@ class ReservationDetailView(APIView):
     )
     def get(self, request, pk):
         try:
-            # Un employé ne peut voir QUE ses propres réservations
+          
             reservation = (
                 Reservation.objects
                 .select_related('menu_jour', 'employe', 'creneau')
@@ -211,3 +211,54 @@ class ReservationDetailView(APIView):
             'message': 'Réservation annulée avec succès.',
             'data': ReservationSerializer(reservation).data
         })
+
+import qrcode
+from io import BytesIO
+from django.http import HttpResponse
+
+class ReservationQRCodeView(APIView):
+    """
+    GET /api/reservations/<id>/code-qr/ - Générer le code QR de la réservation
+    """
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        summary="Générer l'image du QR Code pour une réservation",
+        operation_id="generate_reservation_qr",
+        responses={200: OpenApiTypes.BINARY, 403: OpenApiTypes.OBJECT, 404: OpenApiTypes.OBJECT}
+    )
+    def get(self, request, pk):
+        try:
+            # Un employé ne peut voir QUE ses propres réservations, mais on laisse le cuisinier voir aussi si besoin
+            # Pour l'instant on sécurise l'accès à l'employé propriétaire (et admin potentiellement)
+            if request.user.role == 'employe':
+                reservation = Reservation.objects.get(pk=pk, employe=request.user)
+            else:
+                reservation = Reservation.objects.get(pk=pk)
+        except Reservation.DoesNotExist:
+            return Response(
+                {'message': 'Réservation introuvable.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Générer le QR Code contenant l'UUID unique de la réservation
+        qr_data = str(reservation.code_qr)
+        
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            box_size=10,
+            border=4,
+        )
+        qr.add_data(qr_data)
+        qr.make(fit=True)
+
+        img = qr.make_image(fill_color="black", back_color="white")
+        
+        # Sauvegarder dans un buffer mémoire
+        buffer = BytesIO()
+        img.save(buffer, format="PNG")
+        buffer.seek(0)
+
+        # Renvoyer l'image directement en HTTP
+        return HttpResponse(buffer, content_type="image/png")
