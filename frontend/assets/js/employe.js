@@ -387,6 +387,9 @@ function renderHistorique(){
                     <button onclick="modifyRes(${r.id})" class="px-3 h-8 rounded-xl bg-surface border border-gray-200 text-textMuted hover:bg-gray-50 hover:text-textDark hover:border-gray-300 transition flex items-center justify-center text-[10px] font-bold shadow-sm" title="Modifier la commande"><i class="fa-solid fa-pen mr-1"></i>Modifier</button>
                     <button onclick="askCancelRes(${r.id})" class="px-3 h-8 rounded-xl bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition flex items-center justify-center text-[10px] font-bold shadow-sm" title="Annuler cette réservation"><i class="fa-solid fa-xmark mr-1"></i>Annuler</button>
                 `:`<span class="px-2 py-1 ${sc[r.statut]||'bg-gray-100'} rounded-full text-[10px] font-bold whitespace-nowrap sm:hidden">${sl[r.statut]||r.statut}</span>`}
+                ${r.statut !== 'annule' && r.statut !== 'consomme' ? `
+                    <button onclick="showQRModal(${r.id})" class="px-3 h-8 rounded-xl bg-brandLight text-brand hover:bg-brand hover:text-white transition flex items-center justify-center text-[10px] font-bold shadow-sm" title="Afficher le QR Code"><i class="fa-solid fa-qrcode mr-1"></i>QR Code</button>
+                ` : ''}
             </div>
         </div>`;
     }).join('');
@@ -605,4 +608,37 @@ function getImageUrl(url) {
     if(url.startsWith('http://') || url.startsWith('https://')) return url;
     if(url.startsWith('/media/')) return 'http://127.0.0.1:8000' + url;
     return 'http://127.0.0.1:8000/media/' + url;
+}
+
+// ─── QR CODE ─────────────────────────────────────────────────────────────────
+async function showQRModal(id) {
+    const modal = document.getElementById('modalQR');
+    const img = document.getElementById('qrCodeImage');
+    if (!modal || !img) return;
+    
+    modal.classList.remove('hidden');
+    // Afficher un indicateur de chargement
+    img.src = ''; 
+    img.alt = 'Chargement...';
+
+    try {
+        const h = {};
+        const tk = localStorage.getItem('token');
+        if (tk) h['Authorization'] = `Bearer ${tk}`;
+        
+        const r = await fetch(`${API_URL}/reservations/${id}/code-qr/`, { headers: h });
+        if (!r.ok) throw new Error('Impossible de charger le QR Code');
+        
+        const blob = await r.blob();
+        img.src = URL.createObjectURL(blob);
+        img.alt = 'QR Code';
+    } catch (e) {
+        img.alt = 'Erreur';
+        showToast(e.message, 'error');
+    }
+}
+
+function closeQRModal() {
+    const modal = document.getElementById('modalQR');
+    if (modal) modal.classList.add('hidden');
 }

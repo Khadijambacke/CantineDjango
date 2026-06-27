@@ -4,8 +4,8 @@ from .views.dashboard_views import DashboardGestionnaireView, ExportFacturationR
 from .views.gestionnaire_views import GestionnaireEmployesView, GestionnaireEmployeDetailView, GestionnaireCommandesView
 from .views.plat_views import PlatListCreateView, PlatDetailView
 from .views.menu_views import MenuListCreateView, MenuStatsView, MenuDetailView
-from .views.reservation_views import ReservationListCreateView, ReservationDetailView
-from .views.cuisinier_views import CuisinierMenusView, CuisinierReservationsView, CuisinierUpdateStatusView
+from .views.reservation_views import ReservationListCreateView, ReservationDetailView, ReservationQRCodeView
+from .views.cuisinier_views import CuisinierMenusView, CuisinierReservationsView, CuisinierUpdateStatusView, CuisinierScanQRView
 from .views.notification_views import NotificationListView, NotificationMarkReadView, BroadcastNotificationView, MessageCuisinierView
 
 urlpatterns = [
@@ -29,11 +29,13 @@ urlpatterns = [
     # Routes des Réservations
     path('reservations/', ReservationListCreateView.as_view(), name='reservations-list'),
     path('reservations/<int:pk>/', ReservationDetailView.as_view(), name='reservation-detail'),
+    path('reservations/<int:pk>/code-qr/', ReservationQRCodeView.as_view(), name='reservation-qr'),
     
     # Routes du Cuisinier
     path('cuisinier/menus/', CuisinierMenusView.as_view(), name='cuisinier-menus'),
     path('cuisinier/reservations/', CuisinierReservationsView.as_view(), name='cuisinier-reservations'),
     path('cuisinier/reservations/<int:pk>/update-status/', CuisinierUpdateStatusView.as_view(), name='cuisinier-update-status'),
+    path('cuisinier/reservations/scan-qr/', CuisinierScanQRView.as_view(), name='cuisinier-scan-qr'),
 
     # Routes des Notifications
     path('notifications/', NotificationListView.as_view(), name='notifications-list'),
